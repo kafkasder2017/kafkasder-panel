@@ -42,73 +42,30 @@ const nextConfig = {
       },
     ]
   },
-
-  // Webpack configuration
+  
+  // Context7: Disable static optimization for dynamic content
+  staticPageGenerationTimeout: 120,
+  
+  // Context7: Enable experimental features for better performance
+  swcMinify: true,
+  
+  // Context7: Configure webpack for better bundle optimization
   webpack: (config, { dev, isServer }) => {
-    // Basic fallbacks
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      net: false,
-      tls: false,
-    };
-
-    // Add browser globals fallback for SSR
-    if (isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        self: false,
-        window: false,
-        document: false,
-        navigator: false,
-        location: false,
-        history: false,
-        localStorage: false,
-        sessionStorage: false,
-      };
-    }
-
-    // Development optimizations
-    if (dev) {
-      // Reduce console noise
-      config.infrastructureLogging = {
-        level: 'error',
-      };
-      
-      // Optimize HMR
-      config.optimization = {
-        ...config.optimization,
-        removeAvailableModules: false,
-        removeEmptyChunks: false,
-        splitChunks: false,
-      };
-      
-      // Memory cache for faster rebuilds
-      config.cache = {
-        type: 'memory',
-        maxGenerations: 1,
-      };
-    }
-
-    // Production optimizations
-    if (!dev) {
-      // Optimize chunk splitting
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              chunks: 'all',
-            },
+    // Context7: Optimize bundle size
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
           },
         },
-      };
+      }
     }
-
-    return config;
+    
+    return config
   },
 
   // Reduce console output
