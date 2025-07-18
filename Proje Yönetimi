@@ -1,0 +1,157 @@
+KAFKASDER YÖNETİM PANELİ
+
+
+**MENÜ (SOL NAVBAR):**
+- Dashboard / Ana Sayfa
+- Bağış Yönetimi
+    - Tüm Bağışlar
+    - Bağış Raporları
+    - Nakit Bağışlar
+    - Çek/Senet Bağışlar
+    - Kredi Kartı Bağışları
+    - Online Bağışlar
+    - Tekrarlı İşlemler
+    - Ayni Bağışlar
+    - Kumbaralar / Kumbara Takibi
+    - Toplu Provizyon Alma
+    - Teslimat & Gönderimler
+    - SMS/e-Posta Aboneliği
+- Kişiler & Kurumlar
+    - Kişi Listesi (Bağışçı, Yardım Alan, Üye)
+    - Kurumlar
+    - Gruplar
+- Yardım Yönetimi
+    - Yardım Alanlar
+    - Yardım Başvuruları
+    - Nakdi Yardım İşlemleri
+    - Ayni Yardım İşlemleri
+    - Banka Ödeme Emirleri
+    - Hizmet Takip İşlemleri
+    - Onay Süreci (Çok Adımlı)
+- Üye Yönetimi
+    - Üye Listesi
+    - Aidat Takibi
+    - Raporlar
+    - Tanımlar
+- Finans & Fon Yönetimi
+    - Varlık Özeti
+    - Banka İşlemleri
+    - Kasa Raporları
+    - Döviz Kurları
+    - Dosyadan Veri Yükleme
+- Mesajlaşma
+    - SMS Gönderimi
+    - E-Posta Gönderimi
+    - WhatsApp Gönderimi
+    - Mesaj Grupları
+    - Mesaj Şablonları
+    - Mesaj Raporları
+- İş Yönetimi
+    - Takvim/Etkinlikler
+    - Toplantılar/Kurullar
+    - Komisyonlar
+    - Ziyaretçi Takibi
+    - Saatlik Çalışma Kayıtları
+- Burs Yönetimi
+    - Yetimler & Öğrenciler
+    - Kampanyalar
+    - Okullar
+- Kumbara Yönetimi
+    - Kumbara Listesi
+    - Kumbara Dağıtımı
+    - Kumbara Raporları
+    - Kumbara Hareketleri
+- Hukuk Yönetimi
+    - Dava ve Dosyalar
+    - Tebligatlar
+    - Hukuki Belgeler
+    - Avukatlar & Hukuk Büroları
+    - Hukuk Takvimi
+    - Dava Raporları
+- Parametreler & Tanımlar
+
+**DASHBOARD:**
+- Bekleyen İşler/İşlem Sayacı
+- Son İşlemler
+- Takvim/Planlanmış Etkinlikler
+- Döviz ve Altın Kurları (USD/EUR/GBP/XAU)
+- Gönderilen Mesaj ve E-Posta İstatistikleri
+- Akış Şeması / Workflow
+- Davetler/Katılım Paneli
+
+**GENEL PROJE ÖZELLİKLERİ:**
+- Tüm modüllerde tablo, detay görüntüleme, gelişmiş filtreleme, arama, toplu düzenleme ve dışa aktarım (Excel/CSV/XML) desteği olsun.
+- Menü rol bazlı (Admin, Editör, Operatör, Gözlemci vb.) dinamik olarak gösterilsin.
+- Tüm mesajlaşma modülleri toplu ve bireysel gönderim, geçmiş, şablon ve raporlama içersin. WhatsApp desteği de olsun.
+- Kayıtlar arası bağlantı (ilişkili kayıtlar) sistemi olsun.
+- Dashboard kartları, istatistik kutucukları ve akış diyagramı ile modüler ve dinamik yapı kullanılsın.
+- Çoklu dil desteği (TR, EN, AR) ile form alanları ve açıklamalar çok dilli tutulabilsin.
+
+**KİŞİ DETAY KAYIT FORMU:**
+Aşağıdaki tüm alanları kapsayan, çok bölümlü ve sütunlu, dinamik bir form oluştur:
+
+--- Genel Bilgiler ---
+- Ad, Soyad, Uyruk, Kimlik No, Doğum Tarihi, Cep Telefonu, Sabit Telefon, Yurtdışı Telefonu, E-posta
+- Ülke, Şehir/Bölge, Yerleşim, Mahalle/Köy, Adres
+- Kategori, Dosya Numarası, Sponsorluk Tipi, Kayıt Durumu (Taslak/Kayda Al)
+
+--- Bağlantılı Kayıtlar (widget veya buton ile açılır) ---
+- Banka Hesapları, Dokümanlar, Fotoğraflar, Bağışlar, Referanslar, Sosyal Kartlar, Yardım Talepleri, Yapılan Yardımlar, Kat Özet, Rıza Beyanı
+
+--- Kimlik Bilgileri ---
+- Baba Adı, Ana Adı, Kimlik Türü, Geçerlilik/Veren Kurum, Seri Numarası, Önceki Kimlik(ler), Önceki İkamet(ler)
+
+--- Pasaport ve Vize ---
+- Pasaport Türü, Pasaport No, Pasaport Geçerlilik Tarihi, Vize Başlangıç/Bitiş, Geri Dönüş Belgesi
+
+--- Kişisel Veriler ---
+- Cinsiyet, Doğum Yeri, Medeni Durum, Eğitim, İş Durumu, Çalıştığı Sektör, Meslek Grubu, Meslek Açıklaması, Adli Sicil Kaydı
+
+--- İş ve Gelir Durumu ---
+- Yaşadığı Yer (Kira/Sahip/Diğer), Aylık Gelir, Aylık Gider, Sosyal Güvence, Gelir Kaynakları (çoklu seçim: Maaş, Devlet Yardımı, Zekat, Tarımsal, Diğer...)
+
+--- Sağlık Durumu ---
+- Kan Grubu, Sigara Kullanımı, Engellilik (detaylı), Kullanılan Protezler, Tıbbi Cihazlar, Kullanılan İlaçlar, Ameliyatlar, Hastalıklar (çoklu seçim), Açıklama
+
+--- Acil Durum İletişim ---
+- Ad, Yakınlık, Telefon 1, Telefon 2
+
+--- Etiketler ---
+- Düzenli Yardım Yapılabilir, Gelecek Başvuruları Reddedilmeli, Olumsuz, Sahte Evrak/Yalan Beyan
+
+--- Özel Durumlar ---
+- Depremzede, (eklenebilir)
+
+--- Kayıt Bilgisi ---
+- Kayıt Zamanı, Kayıt Eden, Kayıt IP
+
+--- İlave Açıklamalar ---
+- Türkçe, İngilizce, Arapça
+
+**FORM GENEL KURALLARI:**
+- Her bölüm başlığı altında, çok sütunlu ve gruplandırılmış şekilde gösterilecek.
+- Çoklu seçim ve açılır menüler kullanılacak.
+- Kaydet ve Kapat butonları üstte olacak.
+- Zorunlu alanlar işaretlenecek, eksikse uyarı verilecek.
+- Form sonunda tüm veriler tek bir obje halinde state olarak tutulacak.
+
+**DİĞER MODÜLLER:**  
+Her modül kendi içinde tablo, filtre, detay, toplu düzenleme, dışa aktarım, raporlama, dinamik kartlar ve bağlantılı kayıt desteğine sahip olacak.
+
+**Proje klasör yapısı, ana layout, sidebar, dashboard, detay form ve temel context/provider altyapısı ile birlikte başlat.**
+
+Yazmakta olduğum bağış ve yardım yönetimi paneli projesinde backend (sunucu tarafı) kesinlikle gereklidir.  
+Çünkü:
+- Kişi, kurum, başvuru, bağış, yardım, kullanıcı gibi tüm verilerin güvenli şekilde saklanması ve yönetilmesi backend’de yapılır.
+- Kullanıcı girişi, yetkilendirme, rol bazlı menü ve erişim, oturum yönetimi backend olmadan sağlanamaz.
+- Onay süreçleri, veri kontrolü, işlem geçmişi (log), otomasyonlar backend’de tutulur ve işlenir.
+- Toplu raporlama, dışa aktarım (Excel/CSV), büyük veri işlemleri ve arama/sıralama backend’in görevidir.
+- Frontend tarafında bu işleri yapmak hem güvenlik hem de sürdürülebilirlik açısından doğru değildir; tüm hassas veriler herkese açılmış olur.
+
+Kısacası:
+Veritabanı, kimlik doğrulama, çoklu kullanıcı, güvenli veri işlemleri ve tüm iş mantığı için backend zorunludur.
+
+Projemde mutlaka backend (ör. Supabase, Firebase, Node.js, Python, PHP vs.) kullanılması gerekmektedir.
+Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://ydsnjpmjmmaouldoacst.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlkc25qcG1qbW1hb3VsZG9hY3N0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5MTIzMjMsImV4cCI6MjA2NzQ4ODMyM30.rTwV1zEFOlwekVznZYXj0WXG_YKQ_p_GQfaGlhBpgZI
