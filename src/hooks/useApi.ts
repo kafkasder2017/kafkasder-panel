@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { apiClient } from '@/lib/services/api-client'
+import { supabaseApiClient } from '@/lib/services/api-client'
 import { Context7Record } from '@/types/context7'
 
 // Context7 Generic API Hook with Error Handling
@@ -26,11 +26,7 @@ export function useApi<T>(
     setLoading(true)
     setError(null)
     try {
-      const response = await apiClient.get(table, {
-        filters,
-        orderBy,
-        select
-      })
+      const response = await supabaseApiClient.get<T[]>(table, filters)
       setData(Array.isArray(response) ? response : [])
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Bilinmeyen hata'
@@ -40,7 +36,7 @@ export function useApi<T>(
     } finally {
       setLoading(false)
     }
-  }, [table, filters, orderBy, select])
+  }, [table, filters])
 
   const create = useCallback(async (item: any) => {
     if (!table) {
@@ -50,7 +46,7 @@ export function useApi<T>(
     setLoading(true)
     setError(null)
     try {
-      const response = await apiClient.create(table, item)
+      const response = await supabaseApiClient.post<T>(table, item)
       const newData = Array.isArray(response) ? response : [response]
       setData(prev => [...prev, ...newData])
       return response
@@ -72,7 +68,7 @@ export function useApi<T>(
     setLoading(true)
     setError(null)
     try {
-      const response = await apiClient.update(table, id, updates)
+      const response = await supabaseApiClient.put<T>(table, id, updates)
       const updatedData = Array.isArray(response) ? response[0] : response
       setData(prev => prev.map(item => (item as any).id === id ? updatedData : item))
       return response
@@ -94,7 +90,7 @@ export function useApi<T>(
     setLoading(true)
     setError(null)
     try {
-      await apiClient.delete(table, id)
+      await supabaseApiClient.delete(table, id)
       setData(prev => prev.filter(item => (item as any).id !== id))
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Silme hatası'

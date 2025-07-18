@@ -55,8 +55,8 @@ export function SuspenseWrapper({
   fallback?: ReactNode;
   timeout?: number;
 }) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
+  const [_isLoading, setIsLoading] = useState(true);
+  const [_hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -66,7 +66,7 @@ export function SuspenseWrapper({
     return () => clearTimeout(timer);
   }, [timeout]);
 
-  if (hasError) {
+  if (_hasError) {
     return (
       <div className="p-4 border rounded-lg bg-red-50">
         <h3 className="font-semibold text-red-600">Yükleme Hatası</h3>
@@ -254,7 +254,7 @@ export function InfiniteScrollWithSuspense({
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoadingMore, hasMore]);
+  }, [isLoadingMore, hasMore, handleLoadMore]);
 
   return (
     <div className="space-y-4">
@@ -327,7 +327,7 @@ export function SuspensePatternsExample() {
 
   useEffect(() => {
     loadMoreItems();
-  }, []);
+  }, [loadMoreItems]);
 
   return (
     <div className="container mx-auto p-6 space-y-6">

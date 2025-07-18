@@ -3,9 +3,11 @@ const nextConfig = {
   // Context7 Configuration
   experimental: {
     optimizeCss: true,
-    serverComponentsExternalPackages: [],
     optimizePackageImports: ['@radix-ui/react-slot', 'lucide-react'],
   },
+  
+  // Server external packages (moved from experimental)
+  serverExternalPackages: [],
   
   // Disable static generation for pages with client components
   trailingSlash: false,
@@ -45,9 +47,6 @@ const nextConfig = {
   
   // Context7: Disable static optimization for dynamic content
   staticPageGenerationTimeout: 120,
-  
-  // Context7: Enable experimental features for better performance
-  swcMinify: true,
   
   // Context7: Configure webpack for better bundle optimization
   webpack: (config, { dev, isServer }) => {

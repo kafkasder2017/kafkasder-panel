@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Modal } from '@/components/ui/modal'
-import { createPerson, updatePerson, deletePerson } from '@/lib/supabase/data'
+import { createPerson, updatePerson, deletePerson } from '@/lib/actions/persons'
 import { useRouter } from 'next/navigation'
 
 interface Person {
@@ -72,7 +72,15 @@ export default function PersonsTable({
   // Context7 Create Person Function
   const handleCreatePerson = async () => {
     try {
-      await createPerson(newPerson)
+      const formData = new FormData()
+      formData.append('first_name', newPerson.first_name)
+      formData.append('last_name', newPerson.last_name)
+      formData.append('email', newPerson.email)
+      formData.append('phone', newPerson.phone)
+      formData.append('category', newPerson.category)
+      formData.append('status', newPerson.status)
+      
+      await createPerson(formData)
       setShowCreateModal(false)
       setNewPerson({
         first_name: '',
@@ -93,7 +101,15 @@ export default function PersonsTable({
     if (!editingPerson) return
     
     try {
-      await updatePerson(editingPerson.id, editingPerson)
+      const formData = new FormData()
+      formData.append('first_name', editingPerson.first_name)
+      formData.append('last_name', editingPerson.last_name)
+      formData.append('email', editingPerson.email)
+      formData.append('phone', editingPerson.phone)
+      formData.append('category', editingPerson.category)
+      formData.append('status', editingPerson.status)
+      
+      await updatePerson(editingPerson.id, formData)
       setShowEditModal(false)
       setEditingPerson(null)
       onRefresh()
@@ -254,7 +270,7 @@ export default function PersonsTable({
         <Card>
           <CardContent className="p-4">
             <div className="text-2xl font-bold text-green-600">
-              {persons?.filter((p: Person) => p.status === 'active').length || 0}
+              {persons.filter(p => p.status === 'active').length}
             </div>
             <div className="text-sm text-gray-600">Aktif Kişi</div>
           </CardContent>
@@ -262,7 +278,7 @@ export default function PersonsTable({
         <Card>
           <CardContent className="p-4">
             <div className="text-2xl font-bold text-purple-600">
-              {persons?.filter((p: Person) => p.category === 'donor').length || 0}
+              {persons.filter(p => p.category === 'donor').length}
             </div>
             <div className="text-sm text-gray-600">Bağışçı</div>
           </CardContent>
@@ -270,9 +286,9 @@ export default function PersonsTable({
         <Card>
           <CardContent className="p-4">
             <div className="text-2xl font-bold text-orange-600">
-              {persons?.filter((p: Person) => p.category === 'volunteer').length || 0}
+              {persons.filter(p => p.category === 'beneficiary').length}
             </div>
-            <div className="text-sm text-gray-600">Gönüllü</div>
+            <div className="text-sm text-gray-600">Yardım Alan</div>
           </CardContent>
         </Card>
       </div>
@@ -283,84 +299,84 @@ export default function PersonsTable({
           <CardTitle>Kişi Listesi</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Ad Soyad</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Telefon</TableHead>
-                <TableHead>Kategori</TableHead>
-                <TableHead>Durum</TableHead>
-                <TableHead>Kayıt Tarihi</TableHead>
-                <TableHead>İşlemler</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredPersons.map((person) => (
-                <TableRow key={person.id}>
-                  <TableCell>
-                    <div>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Ad Soyad</TableHead>
+                  <TableHead>E-posta</TableHead>
+                  <TableHead>Telefon</TableHead>
+                  <TableHead>Kategori</TableHead>
+                  <TableHead>Durum</TableHead>
+                  <TableHead>Kayıt Tarihi</TableHead>
+                  <TableHead>İşlemler</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredPersons.map((person) => (
+                  <TableRow key={person.id}>
+                    <TableCell>
                       <div className="font-medium">
                         {person.first_name} {person.last_name}
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{person.email}</TableCell>
-                  <TableCell>{person.phone}</TableCell>
-                  <TableCell>
-                    <CategoryBadge category={person.category} />
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge status={person.status} />
-                  </TableCell>
-                  <TableCell>
-                    {new Date(person.created_at).toLocaleDateString('tr-TR')}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setEditingPerson(person)
-                          setShowEditModal(true)
-                        }}
-                      >
-                        Düzenle
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeletePerson(person.id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        Sil
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                    </TableCell>
+                    <TableCell>{person.email}</TableCell>
+                    <TableCell>{person.phone}</TableCell>
+                    <TableCell>
+                      <CategoryBadge category={person.category} />
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={person.status} />
+                    </TableCell>
+                    <TableCell>
+                      {new Date(person.created_at).toLocaleDateString('tr-TR')}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setEditingPerson(person)
+                            setShowEditModal(true)
+                          }}
+                        >
+                          Düzenle
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeletePerson(person.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          Sil
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
 
           {/* Context7 Pagination */}
           {totalPages > 1 && (
-            <div className="flex justify-between items-center mt-4">
-              <div className="text-sm text-gray-600">
-                Sayfa {currentPage} / {totalPages} ({totalCount} kayıt)
-              </div>
+            <div className="flex justify-center mt-6">
               <div className="flex space-x-2">
                 <Button
                   variant="outline"
                   onClick={() => onPageChange(currentPage - 1)}
-                  disabled={currentPage <= 1}
+                  disabled={currentPage === 1}
                 >
                   Önceki
                 </Button>
+                <span className="flex items-center px-4">
+                  Sayfa {currentPage} / {totalPages}
+                </span>
                 <Button
                   variant="outline"
                   onClick={() => onPageChange(currentPage + 1)}
-                  disabled={currentPage >= totalPages}
+                  disabled={currentPage === totalPages}
                 >
                   Sonraki
                 </Button>
@@ -374,38 +390,42 @@ export default function PersonsTable({
       <Modal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        title="Yeni Kişi Ekle"
       >
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Ad
-            </label>
-            <Input
-              value={newPerson.first_name}
-              onChange={(e) => setNewPerson({...newPerson, first_name: e.target.value})}
-              placeholder="Ad"
-            />
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">Yeni Kişi Ekle</h2>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Ad
+              </label>
+              <Input
+                value={newPerson.first_name}
+                onChange={(e) => setNewPerson({...newPerson, first_name: e.target.value})}
+                placeholder="Ad"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Soyad
+              </label>
+              <Input
+                value={newPerson.last_name}
+                onChange={(e) => setNewPerson({...newPerson, last_name: e.target.value})}
+                placeholder="Soyad"
+              />
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Soyad
-            </label>
-            <Input
-              value={newPerson.last_name}
-              onChange={(e) => setNewPerson({...newPerson, last_name: e.target.value})}
-              placeholder="Soyad"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email
+              E-posta
             </label>
             <Input
               type="email"
               value={newPerson.email}
               onChange={(e) => setNewPerson({...newPerson, email: e.target.value})}
-              placeholder="Email"
+              placeholder="ornek@email.com"
             />
           </div>
           <div>
@@ -415,106 +435,15 @@ export default function PersonsTable({
             <Input
               value={newPerson.phone}
               onChange={(e) => setNewPerson({...newPerson, phone: e.target.value})}
-              placeholder="Telefon"
+              placeholder="+90 555 123 45 67"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Kategori
-            </label>
-            <Select value={newPerson.category} onValueChange={(value) => setNewPerson({...newPerson, category: value})}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="donor">Bağışçı</SelectItem>
-                <SelectItem value="beneficiary">Yardım Alan</SelectItem>
-                <SelectItem value="member">Üye</SelectItem>
-                <SelectItem value="volunteer">Gönüllü</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Durum
-            </label>
-            <Select value={newPerson.status} onValueChange={(value) => setNewPerson({...newPerson, status: value})}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="draft">Taslak</SelectItem>
-                <SelectItem value="active">Aktif</SelectItem>
-                <SelectItem value="inactive">Pasif</SelectItem>
-                <SelectItem value="blocked">Engelli</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setShowCreateModal(false)}>
-              İptal
-            </Button>
-            <Button onClick={handleCreatePerson}>
-              Kaydet
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Context7 Edit Modal */}
-      <Modal
-        isOpen={showEditModal}
-        onClose={() => setShowEditModal(false)}
-        title="Kişi Düzenle"
-      >
-        {editingPerson && (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ad
-              </label>
-              <Input
-                value={editingPerson.first_name}
-                onChange={(e) => setEditingPerson({...editingPerson, first_name: e.target.value})}
-                placeholder="Ad"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Soyad
-              </label>
-              <Input
-                value={editingPerson.last_name}
-                onChange={(e) => setEditingPerson({...editingPerson, last_name: e.target.value})}
-                placeholder="Soyad"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <Input
-                type="email"
-                value={editingPerson.email}
-                onChange={(e) => setEditingPerson({...editingPerson, email: e.target.value})}
-                placeholder="Email"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Telefon
-              </label>
-              <Input
-                value={editingPerson.phone}
-                onChange={(e) => setEditingPerson({...editingPerson, phone: e.target.value})}
-                placeholder="Telefon"
-              />
-            </div>
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Kategori
               </label>
-              <Select value={editingPerson.category} onValueChange={(value) => setEditingPerson({...editingPerson, category: value})}>
+              <Select value={newPerson.category} onValueChange={(value) => setNewPerson({...newPerson, category: value})}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -530,7 +459,7 @@ export default function PersonsTable({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Durum
               </label>
-              <Select value={editingPerson.status} onValueChange={(value) => setEditingPerson({...editingPerson, status: value})}>
+              <Select value={newPerson.status} onValueChange={(value) => setNewPerson({...newPerson, status: value})}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -542,7 +471,106 @@ export default function PersonsTable({
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex justify-end space-x-2">
+          </div>
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button variant="outline" onClick={() => setShowCreateModal(false)}>
+              İptal
+            </Button>
+            <Button onClick={handleCreatePerson}>
+              Kaydet
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Context7 Edit Modal */}
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+      >
+        {editingPerson && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Kişi Düzenle</h2>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ad
+                </label>
+                <Input
+                  value={editingPerson.first_name}
+                  onChange={(e) => setEditingPerson({...editingPerson, first_name: e.target.value})}
+                  placeholder="Ad"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Soyad
+                </label>
+                <Input
+                  value={editingPerson.last_name}
+                  onChange={(e) => setEditingPerson({...editingPerson, last_name: e.target.value})}
+                  placeholder="Soyad"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                E-posta
+              </label>
+              <Input
+                type="email"
+                value={editingPerson.email}
+                onChange={(e) => setEditingPerson({...editingPerson, email: e.target.value})}
+                placeholder="ornek@email.com"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Telefon
+              </label>
+              <Input
+                value={editingPerson.phone}
+                onChange={(e) => setEditingPerson({...editingPerson, phone: e.target.value})}
+                placeholder="+90 555 123 45 67"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Kategori
+                </label>
+                <Select value={editingPerson.category} onValueChange={(value) => setEditingPerson({...editingPerson, category: value})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="donor">Bağışçı</SelectItem>
+                    <SelectItem value="beneficiary">Yardım Alan</SelectItem>
+                    <SelectItem value="member">Üye</SelectItem>
+                    <SelectItem value="volunteer">Gönüllü</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Durum
+                </label>
+                <Select value={editingPerson.status} onValueChange={(value) => setEditingPerson({...editingPerson, status: value})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Taslak</SelectItem>
+                    <SelectItem value="active">Aktif</SelectItem>
+                    <SelectItem value="inactive">Pasif</SelectItem>
+                    <SelectItem value="blocked">Engelli</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2 pt-4">
               <Button variant="outline" onClick={() => setShowEditModal(false)}>
                 İptal
               </Button>

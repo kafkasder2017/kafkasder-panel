@@ -1,9 +1,9 @@
 import { SWRConfiguration } from 'swr'
-import { apiClient } from './services/api-client'
+import { supabaseApiClient } from './services/api-client'
 
 export const fetcher = async (key: [string, any]) => {
   const [table, params] = key
-  return apiClient.get(table, params)
+  return supabaseApiClient.get(table, params)
 }
 
 export const swrConfig: SWRConfiguration = {

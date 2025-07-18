@@ -59,7 +59,8 @@ export default function MemberReportsPage() {
   const [selectedPeriod, setSelectedPeriod] = useState('2024')
   const { user } = useAuth()
 
-  const canViewReports = hasPermission(user, 'members:view')
+  const userRole = user?.profile?.role || 'viewer'
+  const canViewReports = hasPermission(userRole, 'user')
 
   const stats = [
     {

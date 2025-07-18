@@ -73,7 +73,8 @@ export default function MembershipFeesPage() {
   const [selectedPayment, setSelectedPayment] = useState<any>(null)
   const { user } = useAuth()
 
-  const canManagePayments = hasPermission(user, 'members:manage')
+  const userRole = user?.profile?.role || 'viewer'
+  const canManagePayments = hasPermission(userRole, 'manager')
 
   const filteredPayments = mockPayments.filter(payment => {
     const matchesSearch = payment.memberName.toLowerCase().includes(searchTerm.toLowerCase()) ||

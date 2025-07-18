@@ -40,7 +40,7 @@ export default function AidPage() {
   const nextPage = (beneficiariesHook as any).nextPage || (() => {})
   const prevPage = (beneficiariesHook as any).prevPage || (() => {})
 
-  const { createPerson } = usePersonOperations()
+  const { create } = usePersonOperations()
   const countriesHook = useCountries()
   const citiesHook = useCities()
   const districtsHook = useDistricts()
@@ -63,7 +63,7 @@ export default function AidPage() {
   // Context7 Create Beneficiary Function
   const handleCreateBeneficiary = async () => {
     try {
-      await createPerson(newAid as PersonInsert)
+      await create(newAid as PersonInsert)
       setShowCreateModal(false)
       setNewAid({
         first_name: '',

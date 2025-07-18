@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
+import { useSearchParams } from 'next/navigation'
+import { signIn } from '@/lib/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -11,37 +11,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Eye, EyeOff, Mail, Lock, Building2 } from 'lucide-react'
 
 export default function LoginForm() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  
-  const { signIn } = useAuth()
-  const router = useRouter()
+  const searchParams = useSearchParams()
+  const error = searchParams.get('error')
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
+  const handleSubmit = async (formData: FormData) => {
     setIsLoading(true)
-
-    try {
-      console.log('Giriş denemesi:', { email, password })
-      const { data, error } = await signIn(email, password)
-      
-      if (error) {
-        console.error('Giriş hatası:', error)
-        setError(error.message || 'Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin.')
-      } else {
-        console.log('Başarılı giriş:', data)
-        router.push('/dashboard')
-      }
-    } catch (err) {
-      console.error('Beklenmeyen hata:', err)
-      setError('Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.')
-    } finally {
-      setIsLoading(false)
-    }
+    await signIn(formData)
   }
 
   return (
@@ -71,7 +48,7 @@ export default function LoginForm() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form action={handleSubmit} className="space-y-4">
               {error && (
                 <Alert className="border-red-200 bg-red-50 text-red-700">
                   <div className="flex items-center">
@@ -81,7 +58,7 @@ export default function LoginForm() {
                       </svg>
                     </div>
                     <div className="ml-3">
-                      <p className="text-sm font-medium">{error}</p>
+                      <p className="text-sm font-medium">{decodeURIComponent(error)}</p>
                     </div>
                   </div>
                 </Alert>
@@ -98,10 +75,9 @@ export default function LoginForm() {
                   </div>
                   <Input
                     id="email"
+                    name="email"
                     type="email"
                     placeholder="ornek@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
                     required
                     disabled={isLoading}
                     className="pl-10 h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -120,10 +96,9 @@ export default function LoginForm() {
                   </div>
                   <Input
                     id="password"
+                    name="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
                     required
                     disabled={isLoading}
                     className="pl-10 pr-10 h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500"

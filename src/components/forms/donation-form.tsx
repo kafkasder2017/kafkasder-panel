@@ -129,8 +129,6 @@ export function DonationForm({ onSubmit, onCancel, initialData }: DonationFormPr
     resolver: zodResolver(BaseDonationSchema),
     defaultValues: {
       ...initialData,
-      date: new Date(),
-      currency: 'TRY',
       amount: 0,
     }
   })

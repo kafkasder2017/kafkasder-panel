@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/components/providers/AuthProvider'
 import { Layout } from '@/components/layout/Layout'
+import { WebVitals, NavigationTracker } from '@/components/WebVitals'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -28,6 +29,9 @@ export default function RootLayout({
             {children}
           </Layout>
         </AuthProvider>
+        {/* Context7 Pattern: Performance monitoring components */}
+        <WebVitals />
+        <NavigationTracker />
       </body>
     </html>
   )

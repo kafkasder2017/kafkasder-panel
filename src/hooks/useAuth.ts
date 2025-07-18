@@ -1,230 +1,143 @@
 "use client"
 
-import { useState, useEffect, useCallback } from 'react'
-import { supabase } from '@/lib/supabase/client'
-import { AuthUser, AuthState } from '@/lib/auth'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { Context7Record } from '@/types/context7'
 
 // Context7 Auth Hook Pattern
-export const useAuth = () => {
-  const [state, setState] = useState<AuthState>({
-    user: null,
-    session: null,
-    loading: true,
-  })
+export function useAuth() {
+  const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const supabase = createClient()
+  const lastUserId = useRef<string | null>(null)
+  const isProcessing = useRef(false)
 
-  // Context7 Effect Pattern with Error Handling
-  useEffect(() => {
-    // Server-side rendering kontrolü
-    if (typeof window === 'undefined') {
-      setState(prev => ({ ...prev, loading: false }))
-      return
-    }
+  // Context7 Pattern: Memoized auth functions
+  const signIn = useCallback(async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+    return { data, error }
+  }, [supabase.auth])
 
-    let mounted = true
-
-    const getInitialSession = async () => {
-      try {
-        if (!supabase) {
-          throw new Error('Supabase client is not initialized')
-        }
-        const { data: { session }, error } = await supabase.auth.getSession()
-        if (error) {
-          console.error('Session get error:', error)
-        }
-        if (mounted) {
-          if (session) {
-            setState({
-              user: session.user as AuthUser,
-              session: session,
-              loading: false,
-            })
-          } else {
-            setState(prev => ({ ...prev, loading: false }))
-          }
-        }
-      } catch (error) {
-        console.error('Initial session error:', error)
-        if (mounted) {
-          setState(prev => ({ ...prev, loading: false }))
-        }
+  const signUp = useCallback(async (email: string, password: string, metadata?: any) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: metadata
       }
-    }
+    })
+    return { data, error }
+  }, [supabase.auth])
 
-    getInitialSession()
+  const signOut = useCallback(async () => {
+    const { error } = await supabase.auth.signOut()
+    return { error }
+  }, [supabase.auth])
 
-    // Context7 Cleanup Pattern
-    return () => {
-      mounted = false
-    }
-  }, [])
+  const resetPassword = useCallback(async (email: string) => {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset-password`
+    })
+    return { data, error }
+  }, [supabase.auth])
 
-  // Context7 Auth State Change Pattern
+  const updatePassword = useCallback(async (password: string) => {
+    const { data, error } = await supabase.auth.updateUser({
+      password
+    })
+    return { data, error }
+  }, [supabase.auth])
+
+  const updateUser = useCallback(async (updates: any) => {
+    const { data, error } = await supabase.auth.updateUser(updates)
+    return { data, error }
+  }, [supabase.auth])
+
+  // Context7 Pattern: Effect for auth state changes with debouncing
   useEffect(() => {
-    // Server-side rendering kontrolü
-    if (typeof window === 'undefined') {
-      return
-    }
-
-    if (!supabase) {
-      console.error('Supabase client is not initialized')
-      return
-    }
-    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state change:', event, session?.user?.email)
-        
-        if (session) {
-          setState({
-            user: session.user as AuthUser,
-            session,
-            loading: false,
-          })
-        } else {
-          setState({
-            user: null,
-            session: null,
-            loading: false,
-          })
+        // Prevent duplicate processing for the same user
+        if (session?.user?.id === lastUserId.current && isProcessing.current) {
+          return
         }
+
+        // Add small delay to prevent rapid successive calls
+        await new Promise(resolve => setTimeout(resolve, 100))
+
+        isProcessing.current = true
+        lastUserId.current = session?.user?.id || null
+
+        if (session?.user) {
+          try {
+            // Get user profile with role information
+            const { data: profile, error: profileError } = await supabase
+              .from('user_profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .single()
+
+            if (profileError) {
+              // Only log if it's not a "not found" error (PGRST116)
+              if (profileError.code !== 'PGRST116') {
+                console.error('Error fetching user profile:', profileError)
+              }
+              
+              // Create a default profile if user doesn't have one
+              const defaultProfile = {
+                id: session.user.id,
+                full_name: session.user.user_metadata?.full_name || session.user.email,
+                role: 'observer' as const,
+                permissions: [] as string[],
+                is_active: true,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              }
+
+              setUser({
+                ...session.user,
+                profile: defaultProfile
+              })
+            } else {
+              setUser({
+                ...session.user,
+                profile: profile
+              })
+            }
+          } catch (error) {
+            console.error('Unexpected error in auth state change:', error)
+            // Set user with basic info even if profile fetch fails
+            setUser({
+              ...session.user,
+              profile: {
+                id: session.user.id,
+                full_name: session.user.user_metadata?.full_name || session.user.email,
+                role: 'observer' as const,
+                permissions: [] as string[],
+                is_active: true,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              }
+            })
+          }
+        } else {
+          setUser(null)
+        }
+        
+        setLoading(false)
+        isProcessing.current = false
       }
     )
 
     return () => subscription.unsubscribe()
-  }, [])
-
-  // Context7 Memoized Auth Functions
-  const signIn = useCallback(async (email: string, password: string) => {
-    try {
-      console.log('Signing in with:', email)
-      setState(prev => ({ ...prev, loading: true }))
-
-      if (!supabase) {
-        console.error('Supabase client is not initialized')
-        setState(prev => ({ ...prev, loading: false }))
-        return { data: null, error: { message: 'Supabase client is not initialized' } }
-      }
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-      if (error) {
-        console.error('Sign in error:', error)
-        setState(prev => ({ ...prev, loading: false }))
-        return { data: null, error }
-      }
-      
-      console.log('Sign in successful:', data)
-      return { data, error: null }
-    } catch (error) {
-      console.error('Sign in exception:', error)
-      setState(prev => ({ ...prev, loading: false }))
-      return { data: null, error: { message: 'Beklenmeyen bir hata oluştu' } }
-    }
-  }, [])
-
-  const signUp = useCallback(async (email: string, password: string, metadata?: Context7Record) => {
-    try {
-      setState(prev => ({ ...prev, loading: true }))
-
-      if (!supabase) {
-        console.error('Supabase client is not initialized')
-        setState(prev => ({ ...prev, loading: false }))
-        return { data: null, error: { message: 'Supabase client is not initialized' } }
-      }
-
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: metadata,
-        },
-      })
-      
-      if (error) {
-        setState(prev => ({ ...prev, loading: false }))
-        return { data: null, error }
-      }
-      
-      return { data, error: null }
-    } catch (error) {
-      console.error('Sign up exception:', error)
-      setState(prev => ({ ...prev, loading: false }))
-      return { data: null, error: { message: 'Beklenmeyen bir hata oluştu' } }
-    }
-  }, [])
-
-  const signOut = useCallback(async () => {
-    try {
-      setState(prev => ({ ...prev, loading: true }))
-
-      if (!supabase) {
-        console.error('Supabase client is not initialized')
-        setState(prev => ({ ...prev, loading: false }))
-        return { error: { message: 'Supabase client is not initialized' } }
-      }
-
-      const { error } = await supabase.auth.signOut()
-
-      setState(prev => ({ ...prev, loading: false }))
-      return { error }
-    } catch (error) {
-      console.error('Sign out exception:', error)
-      setState(prev => ({ ...prev, loading: false }))
-      return { error: { message: 'Çıkış yapılırken hata oluştu' } }
-    }
-  }, [])
-
-  const resetPassword = useCallback(async (email: string) => {
-    try {
-      if (!supabase) {
-        console.error('Supabase client is not initialized')
-        return { data: null, error: { message: 'Supabase client is not initialized' } }
-      }
-      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
-      })
-      return { data, error }
-    } catch (error) {
-      console.error('Reset password exception:', error)
-      return { data: null, error: { message: 'Şifre sıfırlama hatası' } }
-    }
-  }, [])
-
-  const updatePassword = useCallback(async (password: string) => {
-    try {
-      if (!supabase) {
-        console.error('Supabase client is not initialized')
-        return { data: null, error: { message: 'Supabase client is not initialized' } }
-      }
-      const { data, error } = await supabase.auth.updateUser({
-        password,
-      })
-      return { data, error }
-    } catch (error) {
-      console.error('Update password exception:', error)
-      return { data: null, error: { message: 'Şifre güncelleme hatası' } }
-    }
-  }, [])
-
-  const updateUser = useCallback(async (updates: Context7Record) => {
-    try {
-      if (!supabase) {
-        console.error('Supabase client is not initialized')
-        return { data: null, error: { message: 'Supabase client is not initialized' } }
-      }
-      const { data, error } = await supabase.auth.updateUser(updates)
-      return { data, error }
-    } catch (error) {
-      console.error('Update user exception:', error)
-      return { data: null, error: { message: 'Kullanıcı güncelleme hatası' } }
-    }
-  }, [])
+  }, [supabase.auth])
 
   return {
-    ...state,
+    user,
+    loading,
     signIn,
     signUp,
     signOut,

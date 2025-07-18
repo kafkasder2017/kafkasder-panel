@@ -37,7 +37,7 @@ export default function OrganizationsPage() {
   const nextPage = (organizationsHook as any).nextPage || (() => {})
   const prevPage = (organizationsHook as any).prevPage || (() => {})
 
-  const { createOrganization } = useOrganizationOperations()
+  const { create } = useOrganizationOperations()
   const countriesHook = useCountries()
   const citiesHook = useCities()
   const districtsHook = useDistricts()
@@ -59,7 +59,7 @@ export default function OrganizationsPage() {
   // Context7 Create Organization Function
   const handleCreateOrganization = async () => {
     try {
-      await createOrganization(newOrganization as OrganizationInsert)
+      await create(newOrganization as OrganizationInsert)
       setShowCreateModal(false)
       setNewOrganization({
         name: '',

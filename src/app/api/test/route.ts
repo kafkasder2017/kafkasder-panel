@@ -1,50 +1,31 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 
 export async function GET() {
   try {
-    // Test Supabase connection
-    if (!supabase) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Supabase client not initialized',
-          env: {
-            hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-            hasKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-          }
-        },
-        { status: 500 }
-      )
-    }
-
-    // Test a simple query
+    const supabase = createClient()
+    
+    // Test database connection
     const { data, error } = await supabase
-      .from('profiles')
-      .select('count', { count: 'exact', head: true })
+      .from('persons')
+      .select('count')
+      .limit(1)
 
     if (error) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: error.message,
-          details: error
-        },
+        { error: 'Database connection failed', details: error.message },
         { status: 500 }
       )
     }
 
     return NextResponse.json({
-      success: true,
-      message: 'Supabase connection successful',
-      count: data
+      message: 'API is working',
+      database: 'Connected',
+      timestamp: new Date().toISOString()
     })
   } catch (error) {
     return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error'
-      },
+      { error: 'Internal server error', details: error },
       { status: 500 }
     )
   }

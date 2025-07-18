@@ -240,7 +240,8 @@ export default function NewPersonPage() {
   const router = useRouter()
   const { user } = useAuth()
 
-  const canManagePeople = hasPermission(user, 'people:manage')
+  const userRole = user?.profile?.role || 'viewer'
+  const canManagePeople = hasPermission(userRole, 'user')
 
   if (!canManagePeople) {
     return (

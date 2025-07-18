@@ -107,7 +107,8 @@ export default function OrganizationsPage() {
   const [selectedOrganization, setSelectedOrganization] = useState<any>(null)
   const { user } = useAuth()
 
-  const canManageOrganizations = hasPermission(user, 'people:manage')
+  const userRole = user?.profile?.role || 'viewer'
+  const canManageOrganizations = hasPermission(userRole, 'user')
 
   const filteredOrganizations = mockOrganizations.filter(org => {
     const matchesSearch = org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

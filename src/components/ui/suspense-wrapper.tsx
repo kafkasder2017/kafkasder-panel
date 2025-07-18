@@ -4,6 +4,21 @@ import { Suspense, ReactNode } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
 
+// Context7 Skeleton Components
+export function SkeletonCard() {
+  return (
+    <Card>
+      <CardContent className="p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+          <div className="h-3 bg-gray-200 rounded w-full"></div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 // Context7 Suspense Loading Components
 interface LoadingFallbackProps {
   message?: string

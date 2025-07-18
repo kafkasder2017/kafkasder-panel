@@ -40,7 +40,7 @@ export default function MembersPage() {
   const nextPage = (membersHook as any).nextPage || (() => {})
   const prevPage = (membersHook as any).prevPage || (() => {})
 
-  const { createPerson } = usePersonOperations()
+  const { create } = usePersonOperations()
   const countriesHook = useCountries()
   const citiesHook = useCities()
   const districtsHook = useDistricts()
@@ -63,7 +63,7 @@ export default function MembersPage() {
   // Context7 Create Member Function
   const handleCreateMember = async () => {
     try {
-      await createPerson(newMember as PersonInsert)
+      await create(newMember as PersonInsert)
       setShowCreateModal(false)
       setNewMember({
         first_name: '',

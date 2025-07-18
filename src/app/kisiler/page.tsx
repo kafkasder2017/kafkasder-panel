@@ -1,61 +1,146 @@
-import { Suspense } from 'react'
-import { getPersons } from '@/lib/supabase/data'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { createClientComponentClient } from '@/lib/supabase/client'
 import PersonsTable from '@/components/persons/PersonsTable'
 import { Card, CardContent } from '@/components/ui/card'
 
-// Context7 Server Component for Data Fetching
-async function PersonsData({ 
+// Context7 Client Component for Data Fetching
+function PersonsData({ 
   searchParams 
 }: { 
-  searchParams: { 
+  searchParams: Promise<{ 
     page?: string
     category?: string
     status?: string
     search?: string
-  } 
+  }>
 }) {
-  const page = parseInt(searchParams.page || '1')
-  const category = searchParams.category || ''
-  const status = searchParams.status || ''
-  const search = searchParams.search || ''
+  const [data, setData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [params, setParams] = useState<{
+    page?: string
+    category?: string
+    status?: string
+    search?: string
+  }>({})
+  const supabase = createClientComponentClient()
 
-  try {
-    const result = await getPersons({
-      category: category || undefined,
-      status: status || undefined,
-      search: search || undefined,
-      page,
-      limit: 10
-    })
+  useEffect(() => {
+    // Resolve searchParams promise
+    searchParams.then(setParams)
+  }, [searchParams])
 
-    return (
-      <PersonsTable
-        persons={result.data}
-        totalCount={result.count}
-        currentPage={result.page}
-        totalPages={result.totalPages}
-        onPageChange={(newPage) => {
-          // This will be handled by client component
-        }}
-        onRefresh={() => {
-          // This will be handled by client component
-        }}
-      />
-    )
-  } catch (error) {
+  const page = parseInt(params.page || '1')
+  const category = params.category || ''
+  const status = params.status || ''
+  const search = params.search || ''
+
+  useEffect(() => {
+    if (!params.page && !params.category && !params.status && !params.search) {
+      return // Wait for params to be resolved
+    }
+
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        
+        // Build query
+        let query = supabase
+          .from('persons')
+          .select('*', { count: 'exact' })
+          .range((page - 1) * 10, page * 10 - 1)
+          .order('created_at', { ascending: false })
+
+        // Add filters
+        if (category) {
+          query = query.eq('category', category)
+        }
+        if (status) {
+          query = query.eq('status', status)
+        }
+        if (search) {
+          query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%`)
+        }
+
+        const { data: persons, count, error: fetchError } = await query
+
+        if (fetchError) {
+          throw new Error(fetchError.message)
+        }
+
+        const result = {
+          data: persons || [],
+          count: count || 0,
+          page,
+          totalPages: Math.ceil((count || 0) / 10)
+        }
+
+        setData(result)
+        setError(null)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Bilinmeyen bir hata oluştu')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [page, category, status, search, supabase, params])
+
+  const handlePageChange = (newPage: number) => {
+    // Update URL with new page
+    const url = new URL(window.location.href)
+    url.searchParams.set('page', newPage.toString())
+    window.history.pushState({}, '', url.toString())
+    // Trigger re-render by updating searchParams
+    window.location.reload()
+  }
+
+  const handleRefresh = () => {
+    window.location.reload()
+  }
+
+  if (loading) {
+    return <PersonsLoading />
+  }
+
+  if (error) {
     return (
       <Card>
         <CardContent className="p-6">
           <div className="text-center">
             <h3 className="text-lg font-semibold text-red-600">Hata Oluştu</h3>
-            <p className="text-gray-600 mt-2">
-              {error instanceof Error ? error.message : 'Bilinmeyen bir hata oluştu'}
-            </p>
+            <p className="text-gray-600 mt-2">{error}</p>
           </div>
         </CardContent>
       </Card>
     )
   }
+
+  if (!data) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-gray-600">Veri Bulunamadı</h3>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <PersonsTable
+      persons={data.data}
+      totalCount={data.count}
+      currentPage={data.page}
+      totalPages={data.totalPages}
+      onPageChange={handlePageChange}
+      onRefresh={handleRefresh}
+    />
+  )
 }
 
 // Context7 Loading Component
@@ -85,16 +170,12 @@ function PersonsLoading() {
 export default function PersonsPage({ 
   searchParams 
 }: { 
-  searchParams: { 
+  searchParams: Promise<{ 
     page?: string
     category?: string
     status?: string
     search?: string
-  } 
+  }>
 }) {
-  return (
-    <Suspense fallback={<PersonsLoading />}>
-      <PersonsData searchParams={searchParams} />
-    </Suspense>
-  )
+  return <PersonsData searchParams={searchParams} />
 } 

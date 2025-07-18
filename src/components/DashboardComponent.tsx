@@ -14,36 +14,17 @@ import {
   ArrowDownRight,
   DollarSign,
   Package,
-  FileText,
-  Clock,
-  CheckCircle,
   AlertCircle,
   Calendar,
   MessageSquare,
-  Mail,
-  Smartphone,
-  TrendingUp,
-  TrendingDown,
-  Euro,
-  PoundSterling,
-  Zap,
-  Target,
-  Award,
-  UserPlus,
   UserCheck,
-  UserX,
-  Activity,
-  BarChart3,
   GraduationCap,
   PiggyBank,
   Scale,
   Settings,
-  Plus,
+  Search,
   Eye,
   Edit,
-  Trash2,
-  Search,
-  Filter,
   MoreHorizontal
 } from 'lucide-react'
 
@@ -326,7 +307,7 @@ export default function DashboardComponent() {
       color: 'text-gray-600',
       permission: 'PARAMETERS'
     }
-  ], [])
+  ], [mockStats.totalDonations, mockStats.totalMembers, mockStats.totalOrganizations, mockStats.totalBeneficiaries, mockStats.monthlyDonations])
 
   // Context7 Pattern: Filtered modules based on search and filter
   const filteredModules = useMemo(() => {

@@ -2,9 +2,10 @@
 
 import { createContext, useContext, ReactNode } from 'react'
 import { useAuth } from '@/hooks/useAuth'
-import { AuthUser, AuthState } from '@/lib/auth'
 
-interface AuthContextType extends AuthState {
+interface AuthContextType {
+  user: any
+  loading: boolean
   signIn: (email: string, password: string) => Promise<{ data: any; error: any }>
   signUp: (email: string, password: string, metadata?: any) => Promise<{ data: any; error: any }>
   signOut: () => Promise<{ error: any }>

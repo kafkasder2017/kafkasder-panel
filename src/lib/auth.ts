@@ -1,74 +1,68 @@
-// Context7 Auth Types and Utilities (No Circular Dependencies)
-import { User, Session } from '@supabase/supabase-js'
+import { redirect } from 'next/navigation'
 
-// Auth types
-export interface AuthUser extends Omit<User, 'app_metadata' | 'user_metadata'> {
-  user_metadata?: {
-    full_name?: string
-    role?: string
-    organization_id?: string
+export type UserRole = 'admin' | 'manager' | 'user' | 'viewer'
+
+export interface UserProfile {
+  id: string
+  email: string
+  role: UserRole
+  first_name?: string
+  last_name?: string
+  avatar_url?: string
+  created_at: string
+  updated_at: string
+}
+
+// Client-side auth utilities (no server imports)
+export function hasPermission(userRole: UserRole, requiredRole: UserRole): boolean {
+  const roleHierarchy: Record<UserRole, number> = {
+    'admin': 4,
+    'manager': 3,
+    'user': 2,
+    'viewer': 1
   }
-  app_metadata?: {
-    role?: string
-    permissions?: string[]
+  
+  return roleHierarchy[userRole] >= roleHierarchy[requiredRole]
+}
+
+export function canManageUsers(userRole: UserRole): boolean {
+  return hasPermission(userRole, 'manager')
+}
+
+export function canViewReports(userRole: UserRole): boolean {
+  return hasPermission(userRole, 'user')
+}
+
+export function canEditData(userRole: UserRole): boolean {
+  return hasPermission(userRole, 'user')
+}
+
+export function canViewData(userRole: UserRole): boolean {
+  return hasPermission(userRole, 'viewer')
+}
+
+// Helper function to get user display name
+export function getUserDisplayName(user: any): string {
+  if (user.profile?.first_name && user.profile?.last_name) {
+    return `${user.profile.first_name} ${user.profile.last_name}`
   }
+  
+  if (user.profile?.first_name) {
+    return user.profile.first_name
+  }
+  
+  return user.email || 'Unknown User'
 }
 
-// Auth state management
-export interface AuthState {
-  user: AuthUser | null
-  session: Session | null
-  loading: boolean
-}
-
-// Role-based access control
-export const roles = {
-  ADMIN: 'admin',
-  EDITOR: 'editor',
-  OPERATOR: 'operator',
-  OBSERVER: 'observer',
-} as const
-
-export type UserRole = typeof roles[keyof typeof roles]
-
-// Permission checking
-export const hasPermission = (user: AuthUser | null, permission: string): boolean => {
-  if (!user) return false
+// Helper function to get user initials
+export function getUserInitials(user: any): string {
+  if (user.profile?.first_name && user.profile?.last_name) {
+    return `${user.profile.first_name[0]}${user.profile.last_name[0]}`.toUpperCase()
+  }
   
-  // Admin has all permissions
-  if (user.app_metadata?.role === roles.ADMIN) return true
+  if (user.profile?.first_name) {
+    return user.profile.first_name[0].toUpperCase()
+  }
   
-  // Check specific permissions
-  const permissions = user.app_metadata?.permissions || []
-  
-  // TEMPORARY: For development, give all permissions to any logged in user
-  return true
-  
-  // TODO: Uncomment this when implementing proper permission system
-  // return permissions.includes(permission)
-}
-
-// Role checking
-export const hasRole = (user: AuthUser | null, role: UserRole): boolean => {
-  if (!user) return false
-  return user.app_metadata?.role === role
-}
-
-// Module permissions
-export const modulePermissions = {
-  DASHBOARD: 'dashboard:read',
-  DONATIONS: 'donations:manage',
-  PEOPLE: 'people:manage',
-  ORGANIZATIONS: 'organizations:manage',
-  AID: 'aid:manage',
-  MEMBERS: 'members:manage',
-  FINANCE: 'finance:manage',
-  MESSAGING: 'messaging:manage',
-  WORK: 'work:manage',
-  SCHOLARSHIP: 'scholarship:manage',
-  PIGGY_BANK: 'piggy_bank:manage',
-  LEGAL: 'legal:manage',
-  PARAMETERS: 'parameters:manage',
-} as const
-
-export type ModulePermission = typeof modulePermissions[keyof typeof modulePermissions] 
+  return user.email?.[0].toUpperCase() || 'U'
+} 

@@ -1,79 +1,195 @@
-'use client'
+"use client"
 
 import { useState, useEffect, useCallback, useMemo, useRef, useTransition } from 'react'
+import { useReportWebVitals } from 'next/web-vitals'
+import { usePathname, useSearchParams } from 'next/navigation'
 
-// Context7 Performance Optimization Hooks
+// Extend Window interface for global services
+declare global {
+  interface Window {
+    gtag?: (...args: any[]) => void
+    Rollbar?: {
+      error: (error: Error, errorInfo?: any) => void
+      warning: (message: string, data?: any) => void
+    }
+  }
+}
 
-/**
- * Debounced search hook with proper cleanup
- */
+// Context7 Pattern: Performance monitoring and optimization hooks
+export function usePerformanceOptimizations() {
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const performanceData = useRef<{
+    pageLoads: number
+    navigationTime: number
+    errors: Array<{ type: string; message: string; timestamp: number }>
+  }>({
+    pageLoads: 0,
+    navigationTime: 0,
+    errors: []
+  })
+
+  // Context7 Pattern: Web Vitals reporting
+  useReportWebVitals((metric) => {
+    // Send to analytics service (e.g., Rollbar, Google Analytics)
+    console.log('Web Vitals:', metric)
+    
+    // You can send this to your analytics service
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', metric.name, {
+        value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
+        event_label: metric.id,
+        non_interaction: true,
+      })
+    }
+  })
+
+  // Context7 Pattern: Navigation performance tracking
+  useEffect(() => {
+    const startTime = performance.now()
+    
+    return () => {
+      const endTime = performance.now()
+      const navigationTime = endTime - startTime
+      
+      performanceData.current.navigationTime = navigationTime
+      performanceData.current.pageLoads += 1
+      
+      // Log navigation performance
+      console.log(`Navigation to ${pathname} took ${navigationTime.toFixed(2)}ms`)
+    }
+  }, [pathname, searchParams])
+
+  // Context7 Pattern: Error boundary integration
+  const logError = useCallback((error: Error, errorInfo?: any) => {
+    const errorData = {
+      type: error.name,
+      message: error.message,
+      timestamp: Date.now(),
+      stack: error.stack,
+      errorInfo
+    }
+    
+    performanceData.current.errors.push(errorData)
+    
+    // Send to error tracking service
+    console.error('Performance Error:', errorData)
+    
+    // You can integrate with Rollbar here
+    if (typeof window !== 'undefined' && window.Rollbar) {
+      window.Rollbar.error(error, errorInfo)
+    }
+  }, [])
+
+  // Context7 Pattern: Memory usage monitoring
+  const getMemoryUsage = useCallback(() => {
+    if (typeof window !== 'undefined' && 'memory' in performance) {
+      const memory = (performance as any).memory
+      return {
+        usedJSHeapSize: memory.usedJSHeapSize,
+        totalJSHeapSize: memory.totalJSHeapSize,
+        jsHeapSizeLimit: memory.jsHeapSizeLimit
+      }
+    }
+    return null
+  }, [])
+
+  // Context7 Pattern: Performance metrics
+  const getPerformanceMetrics = useCallback(() => {
+    return {
+      ...performanceData.current,
+      memory: getMemoryUsage(),
+      timestamp: Date.now()
+    }
+  }, [getMemoryUsage])
+
+  return {
+    logError,
+    getMemoryUsage,
+    getPerformanceMetrics,
+    performanceData: performanceData.current
+  }
+}
+
+// Context7 Pattern: Preload pattern for data fetching
+export function usePreloadPattern<T>(
+  preloadFn: () => Promise<T>,
+  dependencies: any[] = []
+) {
+  const dataRef = useRef<T | null>(null)
+  const loadingRef = useRef(false)
+  const errorRef = useRef<Error | null>(null)
+
+  const preload = useCallback(async () => {
+    if (loadingRef.current || dataRef.current) return dataRef.current
+    
+    loadingRef.current = true
+    errorRef.current = null
+    
+    try {
+      const result = await preloadFn()
+      dataRef.current = result
+      return result
+    } catch (error) {
+      errorRef.current = error as Error
+      throw error
+    } finally {
+      loadingRef.current = false
+    }
+  }, [preloadFn])
+
+  const getData = useCallback(() => dataRef.current, [])
+  const isLoading = useCallback(() => loadingRef.current, [])
+  const getError = useCallback(() => errorRef.current, [])
+
+  return {
+    preload,
+    getData,
+    isLoading,
+    getError
+  }
+}
+
+// Context7 Pattern: Debounced search hook
 export function useDebouncedSearch<T>(
-  searchFunction: (query: string) => Promise<T[]>,
+  searchFn: (query: string) => Promise<T[]>,
   delay: number = 300
 ) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<T[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const timeoutRef = useRef<NodeJS.Timeout>()
-  const abortControllerRef = useRef<AbortController>()
 
-  const debouncedSearch = useCallback(async (searchQuery: string) => {
-    // Cancel previous request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
-    }
+  const debouncedSearch = useCallback(
+    debounce(async (searchQuery: string) => {
+      if (!searchQuery.trim()) {
+        setResults([])
+        return
+      }
 
-    if (!searchQuery.trim()) {
-      setResults([])
-      setIsLoading(false)
-      return
-    }
-
-    setIsLoading(true)
-    setError(null)
-
-    // Create new abort controller
-    abortControllerRef.current = new AbortController()
-
-    try {
-      const searchResults = await searchFunction(searchQuery)
-      if (!abortControllerRef.current.signal.aborted) {
+      setIsLoading(true)
+      try {
+        const searchResults = await searchFn(searchQuery)
         setResults(searchResults)
-      }
-    } catch (err) {
-      if (!abortControllerRef.current.signal.aborted) {
-        setError(err instanceof Error ? err.message : 'Search failed')
-      }
-    } finally {
-      if (!abortControllerRef.current.signal.aborted) {
+      } catch (error) {
+        console.error('Search error:', error)
+        setResults([])
+      } finally {
         setIsLoading(false)
       }
-    }
-  }, [searchFunction])
+    }, delay),
+    [searchFn, delay]
+  )
 
-  const handleSearch = useCallback((searchQuery: string) => {
-    setQuery(searchQuery)
-    
-    // Clear existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
+  const handleSearch = useCallback((newQuery: string) => {
+    setQuery(newQuery)
+    debouncedSearch(newQuery)
+  }, [debouncedSearch])
 
-    // Set new timeout
-    timeoutRef.current = setTimeout(() => {
-      debouncedSearch(searchQuery)
-    }, delay)
-  }, [debouncedSearch, delay])
-
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
-      }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
       }
     }
   }, [])
@@ -82,66 +198,92 @@ export function useDebouncedSearch<T>(
     query,
     results,
     isLoading,
-    error,
-    handleSearch,
-    clearResults: useCallback(() => {
-      setResults([])
-      setQuery('')
-      setError(null)
-    }, [])
+    handleSearch
+  }
+}
+
+// Context7 Pattern: Utility function for debouncing
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout
+  
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => func(...args), wait)
+  }
+}
+
+// Context7 Pattern: Intersection Observer hook for lazy loading
+export function useIntersectionObserver(
+  options: IntersectionObserverInit = {}
+) {
+  const [isIntersecting, setIsIntersecting] = useState(false)
+  const [hasIntersected, setHasIntersected] = useState(false)
+  const elementRef = useRef<HTMLElement | null>(null)
+
+  useEffect(() => {
+    const element = elementRef.current
+    if (!element) return
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsIntersecting(entry.isIntersecting)
+      if (entry.isIntersecting && !hasIntersected) {
+        setHasIntersected(true)
+      }
+    }, options)
+
+    observer.observe(element)
+
+    return () => {
+      observer.unobserve(element)
+    }
+  }, [options, hasIntersected])
+
+  return {
+    elementRef,
+    isIntersecting,
+    hasIntersected
+  }
+}
+
+// Context7 Pattern: Virtual scrolling hook
+export function useVirtualScrolling<T>(
+  items: T[],
+  itemHeight: number,
+  containerHeight: number
+) {
+  const [scrollTop, setScrollTop] = useState(0)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const visibleItemCount = Math.ceil(containerHeight / itemHeight)
+  const startIndex = Math.floor(scrollTop / itemHeight)
+  const endIndex = Math.min(startIndex + visibleItemCount + 1, items.length)
+
+  const visibleItems = items.slice(startIndex, endIndex)
+  const totalHeight = items.length * itemHeight
+  const offsetY = startIndex * itemHeight
+
+  const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
+    setScrollTop(event.currentTarget.scrollTop)
+  }, [])
+
+  return {
+    containerRef,
+    visibleItems,
+    totalHeight,
+    offsetY,
+    handleScroll,
+    startIndex,
+    endIndex
   }
 }
 
 /**
  * Optimized virtual scrolling hook
  */
-export function useVirtualScrolling<T>(
-  items: T[],
-  itemHeight: number,
-  containerHeight: number,
-  overscan: number = 5
-) {
-  const [scrollTop, setScrollTop] = useState(0)
-  const containerRef = useRef<HTMLDivElement>(null)
 
-  const visibleRange = useMemo(() => {
-    const start = Math.floor(scrollTop / itemHeight)
-    const end = Math.min(
-      start + Math.ceil(containerHeight / itemHeight) + overscan,
-      items.length
-    )
-    const visibleStart = Math.max(0, start - overscan)
-    
-    return {
-      start: visibleStart,
-      end,
-      offsetY: visibleStart * itemHeight
-    }
-  }, [scrollTop, itemHeight, containerHeight, overscan, items.length])
-
-  const visibleItems = useMemo(() => {
-    return items.slice(visibleRange.start, visibleRange.end)
-  }, [items, visibleRange.start, visibleRange.end])
-
-  const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
-    setScrollTop(event.currentTarget.scrollTop)
-  }, [])
-
-  const scrollToItem = useCallback((index: number) => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop = index * itemHeight
-    }
-  }, [itemHeight])
-
-  return {
-    visibleItems,
-    visibleRange,
-    containerRef,
-    handleScroll,
-    scrollToItem,
-    totalHeight: items.length * itemHeight
-  }
-}
 
 /**
  * Performance monitoring hook
@@ -287,34 +429,7 @@ export function useLazyLoad<T>(
   }
 }
 
-/**
- * Intersection observer hook for animations
- */
-export function useIntersectionObserver(
-  options: IntersectionObserverInit = {}
-) {
-  const [isIntersecting, setIsIntersecting] = useState(false)
-  const [entry, setEntry] = useState<IntersectionObserverEntry | null>(null)
-  const elementRef = useRef<HTMLElement>(null)
 
-  useEffect(() => {
-    const element = elementRef.current
-    if (!element) return
-
-    const observer = new IntersectionObserver(([entry]) => {
-      setIsIntersecting(entry.isIntersecting)
-      setEntry(entry)
-    }, options)
-
-    observer.observe(element)
-
-    return () => {
-      observer.disconnect()
-    }
-  }, [options])
-
-  return { elementRef, isIntersecting, entry }
-}
 
 /**
  * Memoized data processing hook

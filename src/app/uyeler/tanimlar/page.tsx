@@ -92,7 +92,8 @@ export default function MemberDefinitionsPage() {
   const [selectedItem, setSelectedItem] = useState<any>(null)
   const { user } = useAuth()
 
-  const canManageDefinitions = hasPermission(user, 'members:manage')
+  const userRole = user?.profile?.role || 'viewer'
+  const canManageDefinitions = hasPermission(userRole, 'manager')
 
   const handleEdit = (item: any) => {
     setSelectedItem(item)

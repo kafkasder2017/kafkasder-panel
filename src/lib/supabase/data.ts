@@ -1,19 +1,17 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { cache } from 'react'
+import { createClient } from './server'
 
 // Context7: Cached data fetching functions for better performance
-export const getPersons = cache(async (filters?: {
+export const getPersons = async (filters?: {
   category?: string
   status?: string
   search?: string
   page?: number
   limit?: number
 }) => {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createClient()
   
   let query = supabase
-    .from('kisiler')
+    .from('persons')
     .select('*', { count: 'exact' })
 
   // Apply filters
@@ -50,13 +48,13 @@ export const getPersons = cache(async (filters?: {
     limit,
     totalPages: Math.ceil((count || 0) / limit)
   }
-})
+}
 
-export const getPersonById = cache(async (id: string) => {
-  const supabase = createServerComponentClient({ cookies })
+export const getPersonById = async (id: string) => {
+  const supabase = await createClient()
   
   const { data, error } = await supabase
-    .from('kisiler')
+    .from('persons')
     .select('*')
     .eq('id', id)
     .single()
@@ -66,13 +64,13 @@ export const getPersonById = cache(async (id: string) => {
   }
 
   return data
-})
+}
 
-export const getCountries = cache(async () => {
-  const supabase = createServerComponentClient({ cookies })
+export const getCountries = async () => {
+  const supabase = await createClient()
   
   const { data, error } = await supabase
-    .from('ulkeler')
+    .from('countries')
     .select('*')
     .order('name')
 
@@ -82,13 +80,13 @@ export const getCountries = cache(async () => {
   }
 
   return data || []
-})
+}
 
-export const getCities = cache(async (countryId?: string) => {
-  const supabase = createServerComponentClient({ cookies })
+export const getCities = async (countryId?: string) => {
+  const supabase = await createClient()
   
   let query = supabase
-    .from('sehirler')
+    .from('cities')
     .select('*')
     .order('name')
 
@@ -104,13 +102,13 @@ export const getCities = cache(async (countryId?: string) => {
   }
 
   return data || []
-})
+}
 
-export const getDistricts = cache(async (cityId?: string) => {
-  const supabase = createServerComponentClient({ cookies })
+export const getDistricts = async (cityId?: string) => {
+  const supabase = await createClient()
   
   let query = supabase
-    .from('ilceler')
+    .from('districts')
     .select('*')
     .order('name')
 
@@ -126,59 +124,4 @@ export const getDistricts = cache(async (cityId?: string) => {
   }
 
   return data || []
-})
-
-// Context7: Server actions for data mutations
-export async function createPerson(personData: any) {
-  'use server'
-  
-  const supabase = createServerComponentClient({ cookies })
-  
-  const { data, error } = await supabase
-    .from('kisiler')
-    .insert([personData])
-    .select()
-    .single()
-
-  if (error) {
-    throw new Error(`Kişi oluşturulurken hata oluştu: ${error.message}`)
-  }
-
-  return data
-}
-
-export async function updatePerson(id: string, personData: any) {
-  'use server'
-  
-  const supabase = createServerComponentClient({ cookies })
-  
-  const { data, error } = await supabase
-    .from('kisiler')
-    .update(personData)
-    .eq('id', id)
-    .select()
-    .single()
-
-  if (error) {
-    throw new Error(`Kişi güncellenirken hata oluştu: ${error.message}`)
-  }
-
-  return data
-}
-
-export async function deletePerson(id: string) {
-  'use server'
-  
-  const supabase = createServerComponentClient({ cookies })
-  
-  const { error } = await supabase
-    .from('kisiler')
-    .delete()
-    .eq('id', id)
-
-  if (error) {
-    throw new Error(`Kişi silinirken hata oluştu: ${error.message}`)
-  }
-
-  return { success: true }
 } 
