@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   description: 'KAFKASDER Bağış ve Yardım Yönetimi Sistemi',
 }
 
+// Context7: Force dynamic rendering to prevent static generation issues
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default function RootLayout({
   children,
 }: {
