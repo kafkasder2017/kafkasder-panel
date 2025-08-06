@@ -1,0 +1,15 @@
+# TODO:
+
+- [x] 1: Fix type mismatch in ProjeDetay.tsx - convert gorev.sorumluId to string for comparison (priority: High)
+- [x] 2: Fix type mismatch in AyniYardimIslemleri.tsx - handle product ID comparison (priority: High)
+- [x] 3: Fix type mismatches in BagisYonetimi.tsx (3 errors) - handle ID comparisons (priority: High)
+- [x] 4: Fix type mismatches in BaskanOnayi.tsx (2 errors) - handle ID comparisons (priority: High)
+- [x] 5: Fix type mismatches in EtkinlikDetay.tsx (2 errors) - handle ID comparisons (priority: High)
+- [x] 6: Fix type mismatches in GonulluDetay.tsx (6 errors) - handle ID comparisons (priority: High)
+- [x] 7: Fix type mismatches in GonulluYonetimi.tsx (3 errors) - handle ID comparisons (priority: High)
+- [x] 8: Fix type mismatches in HastaneSevkYonetimi.tsx (2 errors) - handle ID comparisons (priority: High)
+- [x] 9: Fix type mismatches in HizmetTakipYonetimi.tsx (2 errors) - handle ID comparisons (priority: High)
+- [x] 10: Fix type mismatches in KisiDetay.tsx (8 errors) - handle ID comparisons (priority: High)
+- [x] 11: Fix type mismatches in KisiYonetimi.tsx (17 errors) - handle ID comparisons and property names (priority: High)
+- [x] 12: Fix type mismatch in KurumYonetimi.tsx (1 error) - handle ID comparison (priority: High)
+- [ ] 13: Run npm run check to verify all TypeScript errors are fixed (priority: High)
