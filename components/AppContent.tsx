@@ -228,11 +228,9 @@ export default function AppContent({ user, userRole }: AppContentProps) {
                 <Route path="/sistem-ayarlari/yedekleme" element={<ProtectedRoute userRole={userRole}><Ayarlar /></ProtectedRoute>} />
                 <Route path="/profil" element={<ProtectedRoute userRole={userRole}><Profil /></ProtectedRoute>} />
                 <Route path="/access-denied" element={<AccessDenied />} />
-                <Route path="/paket-yardim" element={<ProtectedRoute userRole={userRole}><PaketYardim /></ProtectedRoute>} />
                 <Route path="/bildirimler" element={<ProtectedRoute userRole={userRole}><Bildirimler /></ProtectedRoute>} />
                 <Route path="/guvenlik-ayarlari" element={<ProtectedRoute userRole={userRole}><GuvenlikAyarlari /></ProtectedRoute>} />
                 <Route path="/whatsapp" element={<ProtectedRoute userRole={userRole}><WhatsApp /></ProtectedRoute>} />
-                <Route path="/sistem-durumu" element={<ProtectedRoute userRole={userRole}><SistemDurumu /></ProtectedRoute>} />
                 <Route path="/api-entegrasyonu" element={<ProtectedRoute userRole={userRole}><ApiEntegrasyonu /></ProtectedRoute>} />
                 
                 <Route path="*" element={<Navigate to="/" replace />} />
