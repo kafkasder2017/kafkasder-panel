@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { KafkasderSidebar } from './KafkasderSidebar';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
+import { Button } from './ui/Button';
+import { Card } from './ui/Card';
 import { Users, Heart, Calendar, BarChart, TrendingUp, DollarSign } from 'lucide-react';
 
 function DashboardWithNewSidebar() {
