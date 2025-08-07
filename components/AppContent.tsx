@@ -190,7 +190,7 @@ export default function AppContent({ user, userRole }: AppContentProps) {
 
         {/* Main content */}
         <main className="flex-1 overflow-auto bg-transparent">
-          <div className="p-6">
+          <div className="p-8">
             <Suspense fallback={<div className="p-8 text-center text-zinc-600">Yükleniyor...</div>}>
               <Routes>
                 <Route path="/" element={<Dashboard />} />
