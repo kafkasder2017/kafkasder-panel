@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -432,8 +431,6 @@ const KisiYonetimi: React.FC = () => {
                         city: personToSave.city || '',
                         district: personToSave.district || '',
                         neighborhood: personToSave.neighborhood || '',
-                        street: (personToSave as any).street || '',
-                        avenue: (personToSave as any).avenue || '',
                         file_number: personToSave.file_number || `DN${Date.now()}`,
                         sponsorship_type: personToSave.sponsorship_type || SponsorlukTipi.YOK,
                         registration_status: personToSave.registration_status || 'Kaydedildi',
