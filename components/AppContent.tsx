@@ -190,6 +190,7 @@ export default function AppContent({ user, userRole }: AppContentProps) {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/new-sidebar-demo" element={<DashboardWithNewSidebar />} />
                 <Route path="/sidebar-integration-guide" element={<SidebarIntegrationGuide />} />
+                <Route path="/sidebar-customization-demo" element={<SidebarCustomizationDemo />} />
                 <Route path="/icon-showcase" element={<IconShowcase />} />
                 
                 {/* Kişiler & Kurumlar */}
