@@ -193,18 +193,24 @@ const Dashboard = () => {
                         <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200">🎨 Yeni Tasarım Sistemi</h3>
                         <p className="text-sm text-blue-600 dark:text-blue-300">Modern sidebar, temizlenmiş iconlar ve entegrasyon rehberleri</p>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex gap-2 flex-wrap">
+                        <ReactRouterDOM.Link
+                            to="/icon-showcase"
+                            className="bg-white dark:bg-gray-800 border border-purple-300 text-purple-700 dark:text-purple-300 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 text-sm"
+                        >
+                            🎨 Icons
+                        </ReactRouterDOM.Link>
                         <ReactRouterDOM.Link
                             to="/sidebar-integration-guide"
-                            className="bg-white dark:bg-gray-800 border border-blue-300 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                            className="bg-white dark:bg-gray-800 border border-blue-300 text-blue-700 dark:text-blue-300 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-sm"
                         >
-                            Entegrasyon Rehberi
+                            📖 Rehber
                         </ReactRouterDOM.Link>
                         <ReactRouterDOM.Link
                             to="/new-sidebar-demo"
-                            className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105"
+                            className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 text-sm"
                         >
-                            Demo'yu Görüntüle
+                            🚀 Demo
                         </ReactRouterDOM.Link>
                     </div>
                 </div>
