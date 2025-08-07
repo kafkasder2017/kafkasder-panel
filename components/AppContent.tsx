@@ -26,6 +26,7 @@ const DashboardWithNewSidebar = React.lazy(() => import('./DashboardWithNewSideb
 const SidebarIntegrationGuide = React.lazy(() => import('./SidebarIntegrationGuide'));
 const IconShowcase = React.lazy(() => import('./IconShowcase'));
 const SidebarCustomizationDemo = React.lazy(() => import('./SidebarCustomizationDemo'));
+const TransitionSuccess = React.lazy(() => import('./TransitionSuccess'));
 const YetimYonetimi = React.lazy(() => import('./YetimYonetimi'));
 const HukukiYardim = React.lazy(() => import('./HukukiYardim'));
 const Destek = React.lazy(() => import('./Destek'));
