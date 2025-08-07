@@ -134,8 +134,12 @@ const QuickActionCard: React.FC<{
 );
 
 const Dashboard: React.FC = () => {
-    const { stats, recentActivities, monthlyData, loading, error } = useDashboardData();
+    const { data, isLoading: loading, error } = useDashboardData();
     const navigate = ReactRouterDOM.useNavigate();
+
+    const stats = data?.stats;
+    const recentActivities = data?.recentActivities;
+    const monthlyData = data?.monthlyDonationData;
 
     // Mock data for enhanced charts
     const pieData = [
