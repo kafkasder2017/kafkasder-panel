@@ -88,6 +88,10 @@ export default function AppContent({ user, userRole }: AppContentProps) {
       '/harita': 'harita',
       '/dokuman-arsivi': 'dokuman-arsivi',
       '/chatbot-yonetimi': 'chatbot-yonetimi',
+      '/mobile-app': 'mobile-app',
+      '/api-dashboard': 'api-dashboard',
+      '/data-analytics': 'data-analytics',
+      '/web-services': 'web-services',
       '/sistem-ayarlari': 'sistem-ayarlari',
       '/destek': 'destek'
     };
