@@ -1,2 +1,1 @@
-export { QuestionMarkIcon } from './QuestionMarkIcon';
-export { default as QuestionMarkIcon } from './QuestionMarkIcon';
+export { QuestionMarkIcon, default as QuestionMarkIconDefault } from './QuestionMarkIcon';
