@@ -244,7 +244,13 @@ export default function AppContent({ user, userRole }: AppContentProps) {
                 <Route path="/guvenlik-ayarlari" element={<ProtectedRoute userRole={userRole}><GuvenlikAyarlari /></ProtectedRoute>} />
                 <Route path="/whatsapp" element={<ProtectedRoute userRole={userRole}><WhatsApp /></ProtectedRoute>} />
                 <Route path="/api-entegrasyonu" element={<ProtectedRoute userRole={userRole}><ApiEntegrasyonu /></ProtectedRoute>} />
-                
+
+                {/* Technology & Innovation Routes */}
+                <Route path="/mobile-app" element={<ProtectedRoute userRole={userRole}><MobileApp /></ProtectedRoute>} />
+                <Route path="/api-dashboard" element={<ProtectedRoute userRole={userRole}><ApiDashboard /></ProtectedRoute>} />
+                <Route path="/data-analytics" element={<ProtectedRoute userRole={userRole}><DataAnalytics /></ProtectedRoute>} />
+                <Route path="/web-services" element={<ProtectedRoute userRole={userRole}><WebServices /></ProtectedRoute>} />
+
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>
