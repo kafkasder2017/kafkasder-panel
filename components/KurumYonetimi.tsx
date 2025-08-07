@@ -74,11 +74,11 @@ const KurumYonetimi: React.FC = () => {
     };
     
     const columns = useMemo(() => [
-        { key: 'name', title: 'Kurum Ünvanı', render: (k: Kurum) => k.resmiUnvan },
-        { key: 'type', title: 'Kurum Türü', render: (k: Kurum) => k.kurumTuru },
-        { key: 'contact', title: 'Yetkili Kişi', render: (k: Kurum) => k.yetkiliKisiId ? peopleMap.get(k.yetkiliKisiId.toString()) : '-' },
-        { key: 'phone', title: 'Telefon', render: (k: Kurum) => k.telefon },
-        { key: 'status', title: 'Durum', render: (k: Kurum) => <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusClass(k.status)}`}>{k.status}</span> },
+        { key: 'name', title: 'Kurum Ünvanı', render: (k: Kurum) => k?.resmiUnvan || '-' },
+        { key: 'type', title: 'Kurum Türü', render: (k: Kurum) => k?.kurumTuru || '-' },
+        { key: 'contact', title: 'Yetkili Kişi', render: (k: Kurum) => k?.yetkiliKisiId ? peopleMap.get(k.yetkiliKisiId.toString()) || '-' : '-' },
+        { key: 'phone', title: 'Telefon', render: (k: Kurum) => k?.telefon || '-' },
+        { key: 'status', title: 'Durum', render: (k: Kurum) => k?.status ? <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusClass(k.status)}`}>{k.status}</span> : <span className="text-gray-500">-</span> },
         { key: 'actions', title: 'İşlemler', render: (k: Kurum) => (
              <div className="flex items-center justify-end space-x-1">
                 <Button variant="ghost" size="sm" onClick={() => { setEditingKurum(k); setIsModalOpen(true); }}>Düzenle</Button>
@@ -98,7 +98,7 @@ const KurumYonetimi: React.FC = () => {
             <div className="bg-white dark:bg-zinc-800 p-4 sm:p-6 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <Input type="text" placeholder="Kurum adı veya vergi no ile ara..." value={filters.searchTerm} onChange={e => setFilters(f=>({...f, searchTerm: e.target.value}))} />
-                    <Select value={filters.typeFilter} onChange={e => setFilters(f=>({...f, typeFilter: e.target.value as any}))} options={[{value: 'all', label: 'Tüm Kurum Türleri'}, ...Object.values(KurumTuru).map(t => ({value:t, label: t}))]}/>
+                    <Select value={filters.typeFilter} onChange={e => setFilters(f=>({...f, typeFilter: e.target.value as any}))} options={[{value: 'all', label: 'Tüm Kurum T��rleri'}, ...Object.values(KurumTuru).map(t => ({value:t, label: t}))]}/>
                     <Select value={filters.statusFilter} onChange={e => setFilters(f=>({...f, statusFilter: e.target.value as any}))} options={[{value: 'all', label: 'Tüm Durumlar'}, ...Object.values(PersonStatus).map(s => ({value:s, label: s}))]}/>
                 </div>
 
