@@ -88,19 +88,19 @@ const KumbaraYonetimi: React.FC = () => {
     };
 
     const columns = useMemo(() => [
-        { key: 'code', title: 'Kod', render: (k: Kumbara) => k.code },
-        { key: 'location', title: 'Konum', render: (k: Kumbara) => k.location },
-        { key: 'type', title: 'Türü', render: (k: Kumbara) => k.type },
-        { key: 'balance', title: 'Bakiye', render: (k: Kumbara) => k.balance.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) },
-        { key: 'lastEmptied', title: 'Son Boşaltma', render: (k: Kumbara) => k.lastEmptied ? new Date(k.lastEmptied).toLocaleDateString('tr-TR') : 'Hiç' },
-        { key: 'status', title: 'Durum', render: (k: Kumbara) => <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusClass(k.status)}`}>{k.status}</span> },
-        { key: 'actions', title: 'İşlemler', render: (k: Kumbara) => (
+        { key: 'code', title: 'Kod', render: (k: Kumbara) => k?.code || '-' },
+        { key: 'location', title: 'Konum', render: (k: Kumbara) => k?.location || '-' },
+        { key: 'type', title: 'Türü', render: (k: Kumbara) => k?.type || '-' },
+        { key: 'balance', title: 'Bakiye', render: (k: Kumbara) => k?.balance != null ? k.balance.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) : '₺0,00' },
+        { key: 'lastEmptied', title: 'Son Boşaltma', render: (k: Kumbara) => k?.lastEmptied ? new Date(k.lastEmptied).toLocaleDateString('tr-TR') : 'Hiç' },
+        { key: 'status', title: 'Durum', render: (k: Kumbara) => k?.status ? <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusClass(k.status)}`}>{k.status}</span> : '-' },
+        { key: 'actions', title: 'İşlemler', render: (k: Kumbara) => k ? (
             <div className="flex items-center justify-end space-x-1">
                 <Button variant="ghost" size="sm" onClick={() => { setSelectedKumbara(k); setModal('qr'); }}>QR Kod</Button>
                 <Button variant="ghost" size="sm" onClick={() => { setSelectedKumbara(k); setModal('bosalt'); }}>Boşalt</Button>
                 <Button variant="ghost" size="sm" onClick={() => { setSelectedKumbara(k); setModal('form'); }}>Düzenle</Button>
             </div>
-        )},
+        ) : null},
     ], []);
     
     if (isLoading) return <div className="flex items-center justify-center h-full"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div></div>;
