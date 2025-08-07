@@ -34,19 +34,17 @@ const Profil = React.lazy(() => import('./Profil'));
 const AccessDenied = React.lazy(() => import('./AccessDenied'));
 const HaritaModulu = React.lazy(() => import('./HaritaModulu'));
 const OgrenciBurslari = React.lazy(() => import('./OgrenciBurslari'));
-const DepoYonetimi = React.lazy(() => import('./DepoYonetimi'));
+const StokYonetimi = React.lazy(() => import('./StokYonetimi'));
 const OdemeYonetimi = React.lazy(() => import('./OdemeYonetimi'));
 const KumbaraYonetimi = React.lazy(() => import('./KumbaraYonetimi'));
 const AyniYardimIslemleri = React.lazy(() => import('./AyniYardimIslemleri'));
-const VefaDestek = React.lazy(() => import('./VefaDestek'));
+const VefaDestekYonetimi = React.lazy(() => import('./VefaDestekYonetimi'));
 const BaskanOnayi = React.lazy(() => import('./BaskanOnayi'));
-const PaketYardim = React.lazy(() => import('./PaketYardim'));
 const KurumYonetimi = React.lazy(() => import('./KurumYonetimi'));
 const Bildirimler = React.lazy(() => import('./Bildirimler'));
-const DosyaArsivi = React.lazy(() => import('./DosyaArsivi'));
-const GuvenlikAyarlari = React.lazy(() => import('./pages/GuvenlikAyarlari'));
-const WhatsApp = React.lazy(() => import('./pages/WhatsApp'));
-const SistemDurumu = React.lazy(() => import('./SistemDurumu'));
+const DosyaYonetimi = React.lazy(() => import('./DosyaYonetimi'));
+const GuvenlikAyarlari = React.lazy(() => import('../src/pages/GuvenlikAyarlari'));
+const WhatsApp = React.lazy(() => import('../src/pages/WhatsApp'));
 const ApiEntegrasyonu = React.lazy(() => import('./ApiEntegrasyonu'));
 
 interface AppContentProps {
