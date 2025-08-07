@@ -272,7 +272,7 @@ export const updateBagis = (id: number, bagis: Partial<Bagis>): Promise<Bagis> =
 export const deleteBagis = (id: number): Promise<void> => deleteRecord('donations', id);
 
 // Yardım Başvuruları
-export const getYardimBasvurulari = (): Promise<YardimBasvurusu[]> => getAll<YardimBasvurusu>('aid_applications');
+export const getYardimBasvurulari = (): Promise<YardimBasvurusu[]> => getAllSafe<YardimBasvurusu>('aid_applications');
 export const getYardimBasvurusuById = (id: number): Promise<YardimBasvurusu> => getById<YardimBasvurusu>('aid_applications', id);
 export const createYardimBasvurusu = (basvuru: Omit<YardimBasvurusu, 'id'>): Promise<YardimBasvurusu> => createRecord<YardimBasvurusu>('aid_applications', basvuru);
 export const updateYardimBasvurusu = (id: number, basvuru: Partial<YardimBasvurusu>): Promise<YardimBasvurusu> => updateRecord<YardimBasvurusu>('aid_applications', id, basvuru);
