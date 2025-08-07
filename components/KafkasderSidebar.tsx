@@ -5,7 +5,7 @@ import {
   Home, Users, Calendar, BookOpen, Heart, MessageCircle, Settings,
   DollarSign, Building2, Users2, Clock, Shield, Archive,
   BarChart, MapPin, HelpCircle, Bot, FileText, Scale,
-  GraduationCap, Package
+  GraduationCap, Package, Smartphone, Cpu, Database, Globe
 } from "lucide-react";
 import { NavItem } from '../types';
 
