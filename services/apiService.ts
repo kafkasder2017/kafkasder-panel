@@ -1,5 +1,3 @@
-
-
 import {
     Kullanici, Dava, Person, Proje, YardimBasvurusu, OgrenciBursu, Yetim,
     Odeme, Kumbara, DepoUrunu, FinansalKayit, Gonullu, Etkinlik,
@@ -18,9 +16,10 @@ import { MOCK_ETKINLIKLER } from '../data/mockEtkinlikler';
 
 
 // --- Generic Supabase Helper Functions ---
-const handleSupabaseError = (error: { message: string }, context: string) => {
+const handleSupabaseError = (error: any, context: string) => {
     console.error(`Supabase error in ${context}:`, error);
-    throw new Error(`Veritabanı hatası (${context}): ${error.message}`);
+    const errorMessage = error?.message || error?.error_description || JSON.stringify(error);
+    throw new Error(`Veritabanı hatası (${context}): ${errorMessage}`);
 };
 
 const getAll = async <T extends { id: number | string }>(tableName: string): Promise<T[]> => {
