@@ -63,8 +63,7 @@ const YardimAlanlar: React.FC = () => {
                         neighborhood: alanToSave.neighborhood || '',
                         file_number: alanToSave.file_number || `DN${Date.now()}`,
                         sponsorship_type: alanToSave.sponsorship_type || SponsorlukTipi.YOK,
-                        registration_status: alanToSave.registration_status || 'Kaydedildi',
-                        consent_statement: alanToSave.consent_statement || RizaBeyaniStatus.ALINDI
+                        registration_status: alanToSave.registration_status || 'Kaydedildi'
                     } as Omit<Person, 'id'>;
                     await createPerson(payload);
                 }
