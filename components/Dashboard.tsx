@@ -195,6 +195,12 @@ const Dashboard = () => {
                     </div>
                     <div className="flex gap-2 flex-wrap">
                         <ReactRouterDOM.Link
+                            to="/transition-success"
+                            className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 text-sm"
+                        >
+                            🎉 Transition
+                        </ReactRouterDOM.Link>
+                        <ReactRouterDOM.Link
                             to="/sidebar-customization-demo"
                             className="bg-white dark:bg-gray-800 border border-green-300 text-green-700 dark:text-green-300 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-green-50 dark:hover:bg-green-900/20 text-sm"
                         >
