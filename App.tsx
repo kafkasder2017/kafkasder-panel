@@ -29,6 +29,7 @@ const MesajRaporlari = lazy(() => import('./components/MesajRaporlari'));
 const RaporlamaAnalitik = lazy(() => import('./components/RaporlamaAnalitik'));
 const ChatbotYonetimi = lazy(() => import('./components/ChatbotYonetimi'));
 const DashboardWithNewSidebar = lazy(() => import('./components/DashboardWithNewSidebar'));
+const SidebarIntegrationGuide = lazy(() => import('./components/SidebarIntegrationGuide'));
 const YetimYonetimi = lazy(() => import('./components/YetimYonetimi'));
 const HukukiYardim = lazy(() => import('./components/HukukiYardim'));
 const Destek = lazy(() => import('./components/Destek'));
