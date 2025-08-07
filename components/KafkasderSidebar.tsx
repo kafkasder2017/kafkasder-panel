@@ -38,7 +38,7 @@ export function KafkasderSidebar({ activeSection, onSectionChange }: KafkasderSi
         { id: "kisiler", label: "Kişi Listesi", icon: Users, path: "/kisiler" },
         { id: "gonulluler", label: "Gönüllü Yönetimi", icon: Users2, path: "/gonulluler" },
         { id: "kurumlar", label: "Kurumlar", icon: Building2, path: "/kurumlar" },
-        { id: "uyeler", label: "Üye Yönetimi", icon: UserHeart, path: "/uyeler" },
+        { id: "uyeler", label: "Üye Yönetimi", icon: Heart, path: "/uyeler" },
       ]
     },
     {
