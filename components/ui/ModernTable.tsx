@@ -219,14 +219,18 @@ export function ModernTable<T extends { id: string | number }>({
               icon={<ChevronsLeft className="h-4 w-4" />}
               onClick={() => pagination.onPageChange(1)}
               disabled={pagination.page === 1}
-            />
+            >
+              İlk
+            </ModernButton>
             <ModernButton
               variant="ghost"
               size="sm"
               icon={<ChevronLeft className="h-4 w-4" />}
               onClick={() => pagination.onPageChange(pagination.page - 1)}
               disabled={pagination.page === 1}
-            />
+            >
+              Önceki
+            </ModernButton>
             
             <span className="px-4 py-2 text-sm text-gray-700">
               Sayfa {pagination.page} / {Math.ceil(pagination.total / pagination.pageSize)}
