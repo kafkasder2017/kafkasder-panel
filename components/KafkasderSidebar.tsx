@@ -66,6 +66,15 @@ export function KafkasderSidebar({ activeSection, onSectionChange }: KafkasderSi
       ]
     },
     {
+      title: "Teknoloji & İnovasyon",
+      items: [
+        { id: "mobile-app", label: "Mobil Uygulama", icon: Smartphone, path: "/mobile-app" },
+        { id: "api-dashboard", label: "API Yönetimi", icon: Cpu, path: "/api-dashboard" },
+        { id: "data-analytics", label: "Veri Analitik", icon: Database, path: "/data-analytics" },
+        { id: "web-services", label: "Web Servisleri", icon: Globe, path: "/web-services" },
+      ]
+    },
+    {
       title: "Ayarlar",
       items: [
         { id: "sistem-ayarlari", label: "Sistem Ayarları", icon: Settings, path: "/sistem-ayarlari" },
