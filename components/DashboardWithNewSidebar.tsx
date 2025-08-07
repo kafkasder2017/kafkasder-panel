@@ -39,7 +39,7 @@ function DashboardWithNewSidebar() {
       title: 'Bekleyen Başvurular',
       value: '87',
       change: '-5%',
-      icon: ChartBar,
+      icon: BarChart,
       color: 'orange'
     }
   ];
