@@ -91,7 +91,7 @@ const KumbaraYonetimi: React.FC = () => {
     const columns = useMemo(() => [
         { key: 'code', title: 'Kod', render: (k: Kumbara) => k?.code || '-' },
         { key: 'location', title: 'Konum', render: (k: Kumbara) => k?.location || '-' },
-        { key: 'type', title: 'Türü', render: (k: Kumbara) => k?.type || '-' },
+        { key: 'type', title: 'Tür��', render: (k: Kumbara) => k?.type || '-' },
         { key: 'balance', title: 'Bakiye', render: (k: Kumbara) => k?.balance != null ? k.balance.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) : '₺0,00' },
         { key: 'lastEmptied', title: 'Son Boşaltma', render: (k: Kumbara) => k?.lastEmptied ? new Date(k.lastEmptied).toLocaleDateString('tr-TR') : 'Hiç' },
         { key: 'status', title: 'Durum', render: (k: Kumbara) => k?.status ? <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusClass(k.status)}`}>{k.status}</span> : '-' },
@@ -154,7 +154,7 @@ const BosaltModal: React.FC<{ kumbara: Kumbara, onClose: () => void, onSave: (ku
     return (
         <Modal isOpen={true} onClose={onClose} title={`Kumbara Boşalt: ${kumbara.code}`}>
              <form onSubmit={handleSubmit} className="space-y-4">
-                <p><strong>Konum:</strong> {kumbara.location}</p>
+                <p><strong>Konum:</strong> {kumbara?.location || 'Belirtilmemiş'}</p>
                 <p>Mevcut Bakiye: <span className="font-bold">{kumbara.balance != null ? kumbara.balance.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) : '₺0,00'}</span></p>
                 <Input label="Toplanan Tutar (TL)" type="number" value={toplananTutar} onChange={(e) => setToplananTutar(Number(e.target.value))} required />
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Bu tutar yeni bir gelir kaydı olarak işlenecek ve kumbara bakiyesi sıfırlanacaktır.</p>
