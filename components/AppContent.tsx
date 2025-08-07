@@ -25,6 +25,7 @@ const ChatbotYonetimi = React.lazy(() => import('./ChatbotYonetimi'));
 const DashboardWithNewSidebar = React.lazy(() => import('./DashboardWithNewSidebar'));
 const SidebarIntegrationGuide = React.lazy(() => import('./SidebarIntegrationGuide'));
 const IconShowcase = React.lazy(() => import('./IconShowcase'));
+const SidebarCustomizationDemo = React.lazy(() => import('./SidebarCustomizationDemo'));
 const YetimYonetimi = React.lazy(() => import('./YetimYonetimi'));
 const HukukiYardim = React.lazy(() => import('./HukukiYardim'));
 const Destek = React.lazy(() => import('./Destek'));
