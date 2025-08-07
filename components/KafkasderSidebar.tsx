@@ -28,7 +28,7 @@ export function KafkasderSidebar({ activeSection, onSectionChange }: KafkasderSi
       items: [
         { id: "bagis-yonetimi", label: "Bağış Yönetimi", icon: Heart, path: "/bagis-yonetimi" },
         { id: "kumbaralar", label: "Kumbara Takibi", icon: DollarSign, path: "/kumbaralar" },
-        { id: "finansal-kayitlar", label: "Finans & Fon Yönetimi", icon: ChartBar, path: "/finansal-kayitlar" },
+        { id: "finansal-kayitlar", label: "Finans & Fon Yönetimi", icon: BarChart, path: "/finansal-kayitlar" },
         { id: "odemeler", label: "Banka Ödeme Emirleri", icon: FileText, path: "/odemeler" },
       ]
     },
