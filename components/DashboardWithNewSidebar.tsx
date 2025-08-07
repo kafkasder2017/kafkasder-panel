@@ -175,3 +175,5 @@ function DashboardWithNewSidebar() {
     </div>
   );
 }
+
+export default DashboardWithNewSidebar;
