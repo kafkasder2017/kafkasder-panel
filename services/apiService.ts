@@ -259,7 +259,7 @@ export const updateUser = (id: number, user: Partial<Kullanici>): Promise<Kullan
 export const deleteUser = (id: number): Promise<void> => deleteRecord('kullanicilar', id); // Note: this doesn't delete the auth user.
 
 // Projeler
-export const getProjeler = (): Promise<Proje[]> => getAll<Proje>('projects');
+export const getProjeler = (): Promise<Proje[]> => getAllSafe<Proje>('projects');
 export const getProjeById = (id: number): Promise<Proje> => getById<Proje>('projects', id);
 export const createProje = (proje: Omit<Proje, 'id'>): Promise<Proje> => createRecord<Proje>('projects', proje);
 export const updateProje = (id: number, proje: Partial<Proje>): Promise<Proje> => updateRecord<Proje>('projects', id, proje);
