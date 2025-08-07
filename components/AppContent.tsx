@@ -46,7 +46,10 @@ const DosyaYonetimi = React.lazy(() => import('./DosyaYonetimi'));
 const GuvenlikAyarlari = React.lazy(() => import('../src/pages/GuvenlikAyarlari'));
 const WhatsApp = React.lazy(() => import('../src/pages/WhatsApp'));
 const ApiEntegrasyonu = React.lazy(() => import('./ApiEntegrasyonu'));
-const { MobileApp, ApiDashboard, DataAnalytics, WebServices } = React.lazy(() => import('./TechInnovation'));
+const MobileApp = React.lazy(() => import('./TechInnovation').then(module => ({ default: module.MobileApp })));
+const ApiDashboard = React.lazy(() => import('./TechInnovation').then(module => ({ default: module.ApiDashboard })));
+const DataAnalytics = React.lazy(() => import('./TechInnovation').then(module => ({ default: module.DataAnalytics })));
+const WebServices = React.lazy(() => import('./TechInnovation').then(module => ({ default: module.WebServices })));
 
 interface AppContentProps {
   user: User;
