@@ -33,11 +33,11 @@ const KurumYonetimi: React.FC = () => {
     const filteredKurumlar = useMemo(() => {
         return kurumlar.filter(kurum => {
             const lowerSearch = filters.searchTerm.toLowerCase();
-            const matchesSearch = (kurum.resmiUnvan || '').toLowerCase().includes(lowerSearch) ||
-                (kurum.kisaAd && kurum.kisaAd.toLowerCase().includes(lowerSearch)) ||
-                (kurum.vergiNumarasi && kurum.vergiNumarasi.includes(lowerSearch));
-            const matchesStatus = filters.statusFilter === 'all' || kurum.status === filters.statusFilter;
-            const matchesType = filters.typeFilter === 'all' || kurum.kurumTuru === filters.typeFilter;
+            const matchesSearch = (kurum?.resmiUnvan || '').toLowerCase().includes(lowerSearch) ||
+                (kurum?.kisaAd || '').toLowerCase().includes(lowerSearch) ||
+                (kurum?.vergiNumarasi || '').includes(lowerSearch);
+            const matchesStatus = filters.statusFilter === 'all' || kurum?.status === filters.statusFilter;
+            const matchesType = filters.typeFilter === 'all' || kurum?.kurumTuru === filters.typeFilter;
             return matchesSearch && matchesStatus && matchesType;
         });
     }, [kurumlar, filters]);
