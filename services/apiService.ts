@@ -127,8 +127,9 @@ const transformPersonFromDB = (dbPerson: any): Person => {
 };
 
 const transformPersonToDB = (person: Partial<Person>): any => {
-    const dbPerson: any = { ...person };
-    
+    const dbPerson: any = {};
+
+    // Only include fields that exist in the database
     // Map frontend fields to database fields
     if (person.ad) dbPerson.first_name = person.ad;
     if (person.soyad) dbPerson.last_name = person.soyad;
@@ -138,18 +139,25 @@ const transformPersonToDB = (person: Partial<Person>): any => {
     if (person.kayitTarihi) dbPerson.registration_date = person.kayitTarihi;
     if (person.durum) dbPerson.status = person.durum;
     if (person.membershipType) dbPerson.person_type = person.membershipType;
-    
-    // Remove frontend-only fields
-    delete dbPerson.ad;
-    delete dbPerson.soyad;
-    delete dbPerson.adSoyad;
-    delete dbPerson.kimlikNo;
-    delete dbPerson.cepTelefonu;
-    delete dbPerson.dogumTarihi;
-    delete dbPerson.kayitTarihi;
-    delete dbPerson.durum;
-    delete dbPerson.membershipType;
-    
+
+    // Copy database-compatible fields directly
+    const allowedDbFields = [
+        'email', 'address', 'city', 'district', 'neighborhood',
+        'father_name', 'mother_name', 'emergency_contact_name',
+        'emergency_contact_phone', 'emergency_contact_relation',
+        'file_number', 'sponsorship_type', 'registration_status',
+        'is_record_deleted', 'registering_unit', 'country',
+        'lat', 'lng', 'category', 'notes', 'created_by',
+        'gender', 'marital_status', 'education_level', 'employment_status',
+        'residence_type', 'aid_type_received'
+    ];
+
+    allowedDbFields.forEach(field => {
+        if (person[field as keyof Person] !== undefined) {
+            dbPerson[field] = person[field as keyof Person];
+        }
+    });
+
     return dbPerson;
 };
 
@@ -236,8 +244,19 @@ export const createYardimBasvurusu = (basvuru: Omit<YardimBasvurusu, 'id'>): Pro
 export const updateYardimBasvurusu = (id: number, basvuru: Partial<YardimBasvurusu>): Promise<YardimBasvurusu> => updateRecord<YardimBasvurusu>('aid_applications', id, basvuru);
 export const deleteYardimBasvurusu = (id: number): Promise<void> => deleteRecord('aid_applications', id);
 
-// Davalar
-export const getDavalar = (): Promise<Dava[]> => getAll<Dava>('davalar');
+// Davalar - with error handling for missing table
+export const getDavalar = async (): Promise<Dava[]> => {
+    try {
+        return await getAll<Dava>('davalar');
+    } catch (error: any) {
+        // If table doesn't exist, return empty array
+        if (error?.code === 'PGRST116' || error?.message?.includes('relation') || error?.message?.includes('does not exist')) {
+            console.warn('Davalar table does not exist, returning empty array');
+            return [];
+        }
+        throw error;
+    }
+};
 export const getDavaById = (id: number): Promise<Dava> => getById<Dava>('davalar', id);
 export const createDava = (dava: Omit<Dava, 'id'>): Promise<Dava> => createRecord<Dava>('davalar', dava);
 export const updateDava = (id: number, dava: Partial<Dava>): Promise<Dava> => updateRecord<Dava>('davalar', id, dava);
@@ -256,7 +275,7 @@ export const createFinansalKayit = (kayit: Omit<FinansalKayit, 'id'>): Promise<F
 export const updateFinansalKayit = (id: number, kayit: Partial<FinansalKayit>): Promise<FinansalKayit> => updateRecord<FinansalKayit>('financial_transactions', id, kayit);
 export const deleteFinansalKayit = (id: number): Promise<void> => deleteRecord('financial_transactions', id);
 
-// Gönüllüler - Placeholder functions that use people table with filters
+// G��nüllüler - Placeholder functions that use people table with filters
 export const getGonulluler = async (): Promise<Gonullu[]> => {
     const people = await getPeople();
     return people
