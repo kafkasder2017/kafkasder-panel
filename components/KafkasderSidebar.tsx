@@ -1,10 +1,10 @@
 import React from 'react';
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
-import { 
-  Home, Users, Calendar, BookOpen, Heart, MessageCircle, Settings, 
-  DollarSign, Building2, Users2, Clock, Shield, Archive, 
-  ChartBar, MapPin, HelpCircle, Bot, FileText, Scale,
+import {
+  Home, Users, Calendar, BookOpen, Heart, MessageCircle, Settings,
+  DollarSign, Building2, Users2, Clock, Shield, Archive,
+  BarChart, MapPin, HelpCircle, Bot, FileText, Scale,
   GraduationCap, UserHeart, Package
 } from "lucide-react";
 import { NavItem } from '../types';
