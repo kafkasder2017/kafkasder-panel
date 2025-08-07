@@ -91,7 +91,7 @@ const KumbaraYonetimi: React.FC = () => {
     const columns = useMemo(() => [
         { key: 'code', title: 'Kod', render: (k: Kumbara) => k?.code || '-' },
         { key: 'location', title: 'Konum', render: (k: Kumbara) => k?.location || '-' },
-        { key: 'type', title: 'Tür��', render: (k: Kumbara) => k?.type || '-' },
+        { key: 'type', title: 'Türü', render: (k: Kumbara) => k?.type || '-' },
         { key: 'balance', title: 'Bakiye', render: (k: Kumbara) => k?.balance != null ? k.balance.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) : '₺0,00' },
         { key: 'lastEmptied', title: 'Son Boşaltma', render: (k: Kumbara) => k?.lastEmptied ? new Date(k.lastEmptied).toLocaleDateString('tr-TR') : 'Hiç' },
         { key: 'status', title: 'Durum', render: (k: Kumbara) => k?.status ? <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusClass(k.status)}`}>{k.status}</span> : '-' },
@@ -180,12 +180,12 @@ const QrCodeModal: React.FC<{ kumbara: Kumbara, onClose: () => void }> = ({ kumb
         }
     };
     return (
-        <Modal isOpen={true} onClose={onClose} title={`QR Kod: ${kumbara.code}`}>
+        <Modal isOpen={true} onClose={onClose} title={`QR Kod: ${kumbara?.code || 'Kumbara'}`}>
             <div className="text-center">
                 <div ref={printAreaRef}>
-                    <h3 className="text-xl font-bold mb-2">{kumbara.location}</h3>
-                    <img src={kumbara.qrCodeUrl} alt={`QR Code for ${kumbara.code}`} className="mx-auto w-64 h-64 rounded-lg" />
-                    <p className="font-mono mt-2 text-lg">{kumbara.code}</p>
+                    <h3 className="text-xl font-bold mb-2">{kumbara?.location || 'Konum Belirtilmemiş'}</h3>
+                    <img src={kumbara?.qrCodeUrl} alt={`QR Code for ${kumbara?.code || 'Kumbara'}`} className="mx-auto w-64 h-64 rounded-lg" />
+                    <p className="font-mono mt-2 text-lg">{kumbara?.code || 'Kod yok'}</p>
                 </div>
                  <div className="pt-4 mt-4 border-t flex justify-end space-x-3">
                     <Button type="button" variant="outline" onClick={onClose}>Kapat</Button>
