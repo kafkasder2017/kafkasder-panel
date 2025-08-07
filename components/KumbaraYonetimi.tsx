@@ -24,8 +24,9 @@ const KumbaraYonetimi: React.FC = () => {
     
     const filteredKumbaralar = useMemo(() => {
         return (kumbaralar || []).filter(kumbara => {
-            const matchesSearch = kumbara.code.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
-                                  kumbara.location.toLowerCase().includes(filters.searchTerm.toLowerCase());
+            if (!kumbara) return false;
+            const matchesSearch = (kumbara.code?.toLowerCase() || '').includes(filters.searchTerm.toLowerCase()) ||
+                                  (kumbara.location?.toLowerCase() || '').includes(filters.searchTerm.toLowerCase());
             const matchesStatus = filters.statusFilter === 'all' || kumbara.status === filters.statusFilter;
             const matchesType = filters.typeFilter === 'all' || kumbara.type === filters.typeFilter;
             return matchesSearch && matchesStatus && matchesType;
