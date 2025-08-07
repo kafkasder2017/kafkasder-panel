@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
-import { QuestionMarkIcon } from './icons';
+import { QuestionMarkIcon } from './icons/QuestionMarkIcon';
 import { 
   HelpCircle, 
   Info, 
@@ -161,7 +161,7 @@ export default function IconShowcase() {
             <div className="bg-white p-4 rounded-lg border">
               <div className="flex items-center gap-2 mb-2">
                 <QuestionMarkIcon size={20} color="#3B82F6" />
-                <h4 className="font-semibold text-gray-900">Sıkça Sorulan Sorular</h4>
+                <h4 className="font-semibold text-gray-900">Sık��a Sorulan Sorular</h4>
               </div>
               <p className="text-gray-600 text-sm">Bu bölümde en çok sorulan soruları bulabilirsiniz.</p>
             </div>
