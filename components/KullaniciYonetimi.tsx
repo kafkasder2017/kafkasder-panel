@@ -44,9 +44,12 @@ const KullaniciYonetimi: React.FC = () => {
 
     const filteredKullanicilar = useMemo(() => {
         return kullanicilar.filter(kullanici => {
+            // Filter out null or undefined entries
+            if (!kullanici) return false;
+
             const lowerSearch = filters.searchTerm.toLowerCase();
-            const matchesSearch = kullanici.kullanici_adi.toLowerCase().includes(lowerSearch) ||
-                                  kullanici.email.toLowerCase().includes(lowerSearch);
+            const matchesSearch = kullanici.kullanici_adi?.toLowerCase().includes(lowerSearch) ||
+                                  kullanici.email?.toLowerCase().includes(lowerSearch);
             const matchesRole = filters.roleFilter === 'all' || kullanici.rol === filters.roleFilter;
             const matchesStatus = filters.statusFilter === 'all' || kullanici.durum === filters.statusFilter;
             return matchesSearch && matchesRole && matchesStatus;
