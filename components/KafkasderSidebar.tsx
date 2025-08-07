@@ -59,7 +59,7 @@ export function KafkasderSidebar({ activeSection, onSectionChange }: KafkasderSi
         { id: "projeler", label: "Proje Yönetimi", icon: BookOpen, path: "/projeler" },
         { id: "etkinlikler", label: "Etkinlik Yönetimi", icon: Calendar, path: "/etkinlikler" },
         { id: "mesajlasma", label: "Mesajlaşma", icon: MessageCircle, path: "/mesajlasma" },
-        { id: "raporlama-analitik", label: "Raporlama & Analitik", icon: ChartBar, path: "/raporlama-analitik" },
+        { id: "raporlama-analitik", label: "Raporlama & Analitik", icon: BarChart, path: "/raporlama-analitik" },
         { id: "harita", label: "Harita Modülü", icon: MapPin, path: "/harita" },
         { id: "dokuman-arsivi", label: "Doküman Arşivi", icon: Archive, path: "/dokuman-arsivi" },
         { id: "chatbot-yonetimi", label: "AI Chatbot Yönetimi", icon: Bot, path: "/chatbot-yonetimi" },
