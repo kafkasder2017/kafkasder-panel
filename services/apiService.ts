@@ -47,6 +47,21 @@ const getAll = async <T extends { id: number | string }>(tableName: string): Pro
     return data as T[];
 };
 
+// Safe wrapper for getAll that returns empty array on table not found
+const getAllSafe = async <T extends { id: number | string }>(tableName: string): Promise<T[]> => {
+    try {
+        return await getAll<T>(tableName);
+    } catch (error: any) {
+        if (error?.code === 'PGRST116' || error?.message?.includes('relation') || error?.message?.includes('does not exist') || error?.message?.includes('table')) {
+            console.warn(`Table '${tableName}' does not exist, returning empty array`);
+            return [];
+        }
+        // Log the actual error for debugging but still return empty array to prevent crashes
+        console.error(`Supabase error in get all ${tableName}:`, error);
+        return [];
+    }
+};
+
 const getById = async <T extends { id: number | string }>(tableName: string, id: number): Promise<T> => {
     const { data, error } = await supabase.from(tableName).select('*').eq('id', id).single();
     if (error) handleSupabaseError(error, `get by id ${id} from ${tableName}`);
