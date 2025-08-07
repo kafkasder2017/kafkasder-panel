@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Users, Heart, Calendar, ChartBar, TrendingUp, DollarSign } from 'lucide-react';
 
-export function DashboardWithNewSidebar() {
+function DashboardWithNewSidebar() {
   const [activeSection, setActiveSection] = useState('dashboard');
 
   const handleSectionChange = (section: string) => {
