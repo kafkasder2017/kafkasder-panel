@@ -149,7 +149,7 @@ const KumbaraFormModal: React.FC<{ kumbara: Partial<Kumbara>, onClose: () => voi
 };
 
 const BosaltModal: React.FC<{ kumbara: Kumbara, onClose: () => void, onSave: (kumbaraId: number, toplananTutar: number) => void }> = ({ kumbara, onClose, onSave }) => {
-    const [toplananTutar, setToplananTutar] = useState<number>(kumbara.balance);
+    const [toplananTutar, setToplananTutar] = useState<number>(kumbara?.balance || 0);
     const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); onSave(kumbara.id, toplananTutar); };
     return (
         <Modal isOpen={true} onClose={onClose} title={`Kumbara Boşalt: ${kumbara.code}`}>
