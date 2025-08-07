@@ -187,3 +187,5 @@ const getCurrentSection = () => {
     </div>
   );
 }
+
+export default SidebarIntegrationGuide;
