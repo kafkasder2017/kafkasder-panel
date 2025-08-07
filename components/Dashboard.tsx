@@ -187,7 +187,7 @@ const Dashboard = () => {
     return (
         <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">
             {/* Demo link for new sidebar */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-lg font-semibold text-green-800 dark:text-green-200">✅ KafkasderSidebar Entegre Edildi!</h3>
