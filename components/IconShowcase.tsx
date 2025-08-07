@@ -161,9 +161,40 @@ export default function IconShowcase() {
             <div className="bg-white p-4 rounded-lg border">
               <div className="flex items-center gap-2 mb-2">
                 <QuestionMarkIcon size={20} color="#3B82F6" />
-                <h4 className="font-semibold text-gray-900">Sık��a Sorulan Sorular</h4>
+                <h4 className="font-semibold text-gray-900">Sıkça Sorulan Sorular</h4>
               </div>
               <p className="text-gray-600 text-sm">Bu bölümde en çok sorulan soruları bulabilirsiniz.</p>
+            </div>
+          </div>
+
+          {/* Tailwind CSS with currentColor */}
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <h3 className="font-semibold text-gray-900 mb-2">Tailwind CSS + currentColor</h3>
+            <div className="bg-white p-4 rounded-lg border">
+              <div className="flex items-center gap-3 mb-3">
+                <QuestionMarkIcon
+                  size={16}
+                  color="currentColor"
+                  className="text-blue-500 hover:text-blue-600 transition-colors cursor-pointer"
+                />
+                <span className="text-gray-700">Hover üzerime!</span>
+              </div>
+              <div className="flex items-center gap-3 mb-3">
+                <QuestionMarkIcon
+                  size={18}
+                  color="currentColor"
+                  className="text-green-500 hover:text-green-600 transition-colors cursor-pointer"
+                />
+                <span className="text-gray-700">Yeşil tema</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <QuestionMarkIcon
+                  size={20}
+                  color="currentColor"
+                  className="text-purple-500 hover:text-purple-600 transition-colors cursor-pointer"
+                />
+                <span className="text-gray-700">Mor tema</span>
+              </div>
             </div>
           </div>
         </div>
