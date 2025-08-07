@@ -1,13 +1,13 @@
 // Legacy components
 export { Button } from './Button';
-export { Card } from './Card';
+export { Card, StatCard } from './Card';
 export { Input } from './Input';
 export { LoadingSpinner } from './LoadingSpinner';
 export { Modal } from './Modal';
 export { Select } from './Select';
 export { Table } from './Table';
 export { Textarea } from './Textarea';
-export { Skeleton } from './Skeleton';
+export { Skeleton, StatCardSkeleton, ChartSkeleton, ActivityListSkeleton } from './Skeleton';
 export { PageHeader } from './PageHeader';
 
 // Modern components
