@@ -17,7 +17,7 @@ const getStatusClass = (status: PersonStatus) => {
 
 const KurumYonetimi: React.FC = () => {
     const { data, isLoading, error, refresh } = useKurumYonetimi();
-    const { kurumlar, people } = data;
+    const { kurumlar = [], people = [] } = data || {};
 
     const [filters, setFilters] = useState({
         searchTerm: '',
@@ -28,16 +28,19 @@ const KurumYonetimi: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingKurum, setEditingKurum] = useState<Partial<Kurum> | null>(null);
 
-    const peopleMap = useMemo(() => new Map(people.map(p => [p.id, `${p.ad} ${p.soyad}`])), [people]);
+    const peopleMap = useMemo(() => new Map(
+        people.filter(p => p && p.id).map(p => [p.id, `${p.ad || ''} ${p.soyad || ''}`.trim() || 'İsimsiz'])
+    ), [people]);
 
     const filteredKurumlar = useMemo(() => {
         return kurumlar.filter(kurum => {
+            if (!kurum) return false;
             const lowerSearch = filters.searchTerm.toLowerCase();
-            const matchesSearch = (kurum.resmiUnvan || '').toLowerCase().includes(lowerSearch) ||
-                (kurum.kisaAd && kurum.kisaAd.toLowerCase().includes(lowerSearch)) ||
-                (kurum.vergiNumarasi && kurum.vergiNumarasi.includes(lowerSearch));
-            const matchesStatus = filters.statusFilter === 'all' || kurum.status === filters.statusFilter;
-            const matchesType = filters.typeFilter === 'all' || kurum.kurumTuru === filters.typeFilter;
+            const matchesSearch = (kurum?.resmiUnvan || '').toLowerCase().includes(lowerSearch) ||
+                (kurum?.kisaAd || '').toLowerCase().includes(lowerSearch) ||
+                (kurum?.vergiNumarasi || '').includes(lowerSearch);
+            const matchesStatus = filters.statusFilter === 'all' || kurum?.status === filters.statusFilter;
+            const matchesType = filters.typeFilter === 'all' || kurum?.kurumTuru === filters.typeFilter;
             return matchesSearch && matchesStatus && matchesType;
         });
     }, [kurumlar, filters]);
@@ -74,17 +77,17 @@ const KurumYonetimi: React.FC = () => {
     };
     
     const columns = useMemo(() => [
-        { key: 'name', title: 'Kurum Ünvanı', render: (k: Kurum) => k.resmiUnvan },
-        { key: 'type', title: 'Kurum Türü', render: (k: Kurum) => k.kurumTuru },
-        { key: 'contact', title: 'Yetkili Kişi', render: (k: Kurum) => k.yetkiliKisiId ? peopleMap.get(k.yetkiliKisiId.toString()) : '-' },
-        { key: 'phone', title: 'Telefon', render: (k: Kurum) => k.telefon },
-        { key: 'status', title: 'Durum', render: (k: Kurum) => <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusClass(k.status)}`}>{k.status}</span> },
-        { key: 'actions', title: 'İşlemler', render: (k: Kurum) => (
+        { key: 'name', title: 'Kurum Ünvanı', render: (k: Kurum) => k?.resmiUnvan || '-' },
+        { key: 'type', title: 'Kurum Türü', render: (k: Kurum) => k?.kurumTuru || '-' },
+        { key: 'contact', title: 'Yetkili Kişi', render: (k: Kurum) => k?.yetkiliKisiId ? peopleMap.get(k.yetkiliKisiId.toString()) || '-' : '-' },
+        { key: 'phone', title: 'Telefon', render: (k: Kurum) => k?.telefon || '-' },
+        { key: 'status', title: 'Durum', render: (k: Kurum) => k?.status ? <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusClass(k.status)}`}>{k.status}</span> : <span className="text-gray-500">-</span> },
+        { key: 'actions', title: 'İşlemler', render: (k: Kurum) => k ? (
              <div className="flex items-center justify-end space-x-1">
                 <Button variant="ghost" size="sm" onClick={() => { setEditingKurum(k); setIsModalOpen(true); }}>Düzenle</Button>
                 <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/50" onClick={() => handleDeleteClick(k.id)}>Sil</Button>
             </div>
-        )}
+        ) : null }
     ], [peopleMap]);
 
     if (isLoading) return <div className="flex items-center justify-center h-full"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div></div>;

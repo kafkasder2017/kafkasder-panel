@@ -24,8 +24,9 @@ const KumbaraYonetimi: React.FC = () => {
     
     const filteredKumbaralar = useMemo(() => {
         return (kumbaralar || []).filter(kumbara => {
-            const matchesSearch = kumbara.code.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
-                                  kumbara.location.toLowerCase().includes(filters.searchTerm.toLowerCase());
+            if (!kumbara) return false;
+            const matchesSearch = (kumbara.code?.toLowerCase() || '').includes(filters.searchTerm.toLowerCase()) ||
+                                  (kumbara.location?.toLowerCase() || '').includes(filters.searchTerm.toLowerCase());
             const matchesStatus = filters.statusFilter === 'all' || kumbara.status === filters.statusFilter;
             const matchesType = filters.typeFilter === 'all' || kumbara.type === filters.typeFilter;
             return matchesSearch && matchesStatus && matchesType;
@@ -88,19 +89,19 @@ const KumbaraYonetimi: React.FC = () => {
     };
 
     const columns = useMemo(() => [
-        { key: 'code', title: 'Kod', render: (k: Kumbara) => k.code },
-        { key: 'location', title: 'Konum', render: (k: Kumbara) => k.location },
-        { key: 'type', title: 'Türü', render: (k: Kumbara) => k.type },
-        { key: 'balance', title: 'Bakiye', render: (k: Kumbara) => k.balance.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) },
-        { key: 'lastEmptied', title: 'Son Boşaltma', render: (k: Kumbara) => k.lastEmptied ? new Date(k.lastEmptied).toLocaleDateString('tr-TR') : 'Hiç' },
-        { key: 'status', title: 'Durum', render: (k: Kumbara) => <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusClass(k.status)}`}>{k.status}</span> },
-        { key: 'actions', title: 'İşlemler', render: (k: Kumbara) => (
+        { key: 'code', title: 'Kod', render: (k: Kumbara) => k?.code || '-' },
+        { key: 'location', title: 'Konum', render: (k: Kumbara) => k?.location || '-' },
+        { key: 'type', title: 'Türü', render: (k: Kumbara) => k?.type || '-' },
+        { key: 'balance', title: 'Bakiye', render: (k: Kumbara) => k?.balance != null ? k.balance.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) : '₺0,00' },
+        { key: 'lastEmptied', title: 'Son Boşaltma', render: (k: Kumbara) => k?.lastEmptied ? new Date(k.lastEmptied).toLocaleDateString('tr-TR') : 'Hiç' },
+        { key: 'status', title: 'Durum', render: (k: Kumbara) => k?.status ? <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusClass(k.status)}`}>{k.status}</span> : '-' },
+        { key: 'actions', title: 'İşlemler', render: (k: Kumbara) => k ? (
             <div className="flex items-center justify-end space-x-1">
                 <Button variant="ghost" size="sm" onClick={() => { setSelectedKumbara(k); setModal('qr'); }}>QR Kod</Button>
                 <Button variant="ghost" size="sm" onClick={() => { setSelectedKumbara(k); setModal('bosalt'); }}>Boşalt</Button>
                 <Button variant="ghost" size="sm" onClick={() => { setSelectedKumbara(k); setModal('form'); }}>Düzenle</Button>
             </div>
-        )},
+        ) : null},
     ], []);
     
     if (isLoading) return <div className="flex items-center justify-center h-full"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div></div>;
@@ -148,13 +149,13 @@ const KumbaraFormModal: React.FC<{ kumbara: Partial<Kumbara>, onClose: () => voi
 };
 
 const BosaltModal: React.FC<{ kumbara: Kumbara, onClose: () => void, onSave: (kumbaraId: number, toplananTutar: number) => void }> = ({ kumbara, onClose, onSave }) => {
-    const [toplananTutar, setToplananTutar] = useState<number>(kumbara.balance);
+    const [toplananTutar, setToplananTutar] = useState<number>(kumbara?.balance || 0);
     const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); onSave(kumbara.id, toplananTutar); };
     return (
         <Modal isOpen={true} onClose={onClose} title={`Kumbara Boşalt: ${kumbara.code}`}>
              <form onSubmit={handleSubmit} className="space-y-4">
-                <p><strong>Konum:</strong> {kumbara.location}</p>
-                <p>Mevcut Bakiye: <span className="font-bold">{kumbara.balance.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}</span></p>
+                <p><strong>Konum:</strong> {kumbara?.location || 'Belirtilmemiş'}</p>
+                <p>Mevcut Bakiye: <span className="font-bold">{kumbara.balance != null ? kumbara.balance.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) : '₺0,00'}</span></p>
                 <Input label="Toplanan Tutar (TL)" type="number" value={toplananTutar} onChange={(e) => setToplananTutar(Number(e.target.value))} required />
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Bu tutar yeni bir gelir kaydı olarak işlenecek ve kumbara bakiyesi sıfırlanacaktır.</p>
                 <div className="pt-4 flex justify-end space-x-3">
@@ -179,12 +180,12 @@ const QrCodeModal: React.FC<{ kumbara: Kumbara, onClose: () => void }> = ({ kumb
         }
     };
     return (
-        <Modal isOpen={true} onClose={onClose} title={`QR Kod: ${kumbara.code}`}>
+        <Modal isOpen={true} onClose={onClose} title={`QR Kod: ${kumbara?.code || 'Kumbara'}`}>
             <div className="text-center">
                 <div ref={printAreaRef}>
-                    <h3 className="text-xl font-bold mb-2">{kumbara.location}</h3>
-                    <img src={kumbara.qrCodeUrl} alt={`QR Code for ${kumbara.code}`} className="mx-auto w-64 h-64 rounded-lg" />
-                    <p className="font-mono mt-2 text-lg">{kumbara.code}</p>
+                    <h3 className="text-xl font-bold mb-2">{kumbara?.location || 'Konum Belirtilmemiş'}</h3>
+                    <img src={kumbara?.qrCodeUrl} alt={`QR Code for ${kumbara?.code || 'Kumbara'}`} className="mx-auto w-64 h-64 rounded-lg" />
+                    <p className="font-mono mt-2 text-lg">{kumbara?.code || 'Kod yok'}</p>
                 </div>
                  <div className="pt-4 mt-4 border-t flex justify-end space-x-3">
                     <Button type="button" variant="outline" onClick={onClose}>Kapat</Button>

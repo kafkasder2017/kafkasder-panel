@@ -1,11 +1,18 @@
-
 import React from 'react';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import * as ReactRouterDOM from 'react-router-dom';
 import { DashboardStats, RecentActivity } from '../types.ts';
-import { ICONS } from '../constants.tsx';
 import { useDashboardData } from '../hooks/useData.ts';
-import { StatCard, StatCardSkeleton, ChartSkeleton, ActivityListSkeleton } from './ui';
+import { ModernCard, ModernCardHeader, ModernCardContent } from './ui/ModernCard';
+import { ModernButton } from './ui/ModernButton';
+import { theme } from './ui/theme';
+import {
+  TrendingUp, TrendingDown, Users, Heart, DollarSign, Calendar,
+  Activity, Clock, Bell, ChevronRight, Sparkles, Target, Award,
+  BarChart3, PieChart as PieChartIcon, LineChart as LineChartIcon,
+  ArrowUpRight, ArrowDownRight, Plus, Filter, Download, RefreshCw,
+  MapPin, MessageCircle, FileText, Package, AlertTriangle, CheckCircle
+} from "lucide-react";
 
 const timeSince = (dateString: string) => {
     const date = new Date(dateString);
@@ -25,130 +32,163 @@ const timeSince = (dateString: string) => {
 };
 
 const SafeActivityDescription: React.FC<{ description: string }> = ({ description }) => {
-    // This regex looks for <strong> tags and captures their content.
     const strongTagRegex = /<strong>(.*?)<\/strong>/;
     const match = description.match(strongTagRegex);
 
     if (match && match.index !== undefined) {
-        const actionText = match[1]; // The text inside the <strong> tag
-        const prefixText = description.substring(0, match.index); // The text before it (the name)
-        const suffixText = description.substring(match.index + match[0].length); // Any text after it
+        const actionText = match[1];
+        const prefixText = description.substring(0, match.index);
+        const suffixText = description.substring(match.index + match[0].length);
 
         return (
-            <p className="text-sm text-zinc-700 dark:text-zinc-300 group-hover:text-blue-600 dark:group-hover:text-white">
+            <p className="text-sm text-gray-600 group-hover:text-gray-800 transition-colors">
                 {prefixText}
-                <strong>{actionText}</strong>
+                <strong className="text-blue-600 font-semibold">{actionText}</strong>
                 {suffixText}
             </p>
         );
     }
     
-    // Fallback for any descriptions that don't match the pattern. Render safely.
     return (
-        <p className="text-sm text-zinc-700 dark:text-zinc-300 group-hover:text-blue-600 dark:group-hover:text-white">
+        <p className="text-sm text-gray-600 group-hover:text-gray-800 transition-colors">
             {description}
         </p>
     );
 };
 
-const RecentActivityList: React.FC<{ activities: RecentActivity[] }> = ({ activities }) => {
-    const activityIcons = {
-        donation: <div className="bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 p-2 rounded-full">{React.cloneElement(ICONS.DONATION, { strokeWidth: 2 })}</div>,
-        person: <div className="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 p-2 rounded-full">{React.cloneElement(ICONS.PEOPLE, { strokeWidth: 2 })}</div>,
-        application: <div className="bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400 p-2 rounded-full">{React.cloneElement(ICONS.AID_RECIPIENT, { strokeWidth: 2 })}</div>,
-    };
-    
-    if (activities.length === 0) {
-        return (
-            <div className="bg-white dark:bg-zinc-800 p-6 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700 h-full flex items-center justify-center">
-                <p className="text-zinc-500 dark:text-zinc-400">Son aktivite bulunmuyor.</p>
-            </div>
-        );
-    }
-    
+// Enhanced Stat Card Component
+interface ModernStatCardProps {
+  title: string;
+  value: string | number;
+  icon: React.ReactNode;
+  change?: number;
+  changeType?: 'increase' | 'decrease';
+  color: string;
+  subtitle?: string;
+  loading?: boolean;
+}
+
+const ModernStatCard: React.FC<ModernStatCardProps> = ({
+  title, value, icon, change, changeType, color, subtitle, loading = false
+}) => {
+  if (loading) {
     return (
-        <div className="bg-white dark:bg-zinc-800 p-6 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700">
-            <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 mb-4">Son Aktiviteler</h3>
-            <ul className="space-y-4">
-                {activities.map(activity => (
-                    <li key={activity.id}>
-                        <ReactRouterDOM.Link to={activity.link} className="flex items-center space-x-4 group">
-                            <div className="flex-shrink-0">
-                                {activityIcons[activity.type]}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <SafeActivityDescription description={activity.description} />
-                                {activity.amount && <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{activity.amount}</p>}
-                            </div>
-                            <time className="text-xs text-zinc-500 dark:text-zinc-400 flex-shrink-0">{timeSince(activity.timestamp)}</time>
-                        </ReactRouterDOM.Link>
-                    </li>
-                ))}
-            </ul>
-        </div>
+      <ModernCard variant="default" className="animate-pulse">
+        <div className="h-24 bg-gray-200 rounded"></div>
+      </ModernCard>
     );
+  }
+
+  return (
+    <ModernCard variant="interactive" className="group">
+      <div className="flex items-start justify-between">
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">{title}</p>
+          <div className="flex items-baseline gap-2">
+            <h3 className="text-3xl font-bold text-gray-900">{value.toLocaleString()}</h3>
+            {change !== undefined && (
+              <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${
+                changeType === 'increase' 
+                  ? 'bg-green-100 text-green-700' 
+                  : 'bg-red-100 text-red-700'
+              }`}>
+                {changeType === 'increase' ? 
+                  <ArrowUpRight className="h-3 w-3" /> : 
+                  <ArrowDownRight className="h-3 w-3" />
+                }
+                {Math.abs(change)}%
+              </div>
+            )}
+          </div>
+          {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
+        </div>
+        
+        <div className={`w-12 h-12 bg-gradient-to-r ${color} rounded-xl flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300`}>
+          {icon}
+        </div>
+      </div>
+    </ModernCard>
+  );
 };
 
-const MonthlyDonationsChart: React.FC<{ data: any[] }> = ({ data }) => {
-    return (
-        <div className="bg-white dark:bg-zinc-800 p-6 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700">
-            <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 mb-4">Aylık Bağış Grafiği</h3>
-            <div className="h-72">
-                {data.length === 0 ? (
-                    <div className="flex items-center justify-center h-full">
-                        <div className="text-center">
-                            <div className="text-zinc-400 dark:text-zinc-500 mb-2">
-                                <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                            </div>
-                            <p className="text-zinc-500 dark:text-zinc-400">Henüz bağış verisi bulunmuyor.</p>
-                        </div>
-                    </div>
-                ) : (
-                    <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.5} />
-                            <XAxis dataKey="name" stroke="currentColor" className="text-xs" />
-                            <YAxis stroke="currentColor" className="text-xs" tickFormatter={(value) => `${Number(value) / 1000}k`} />
-                            <Tooltip
-                                contentStyle={{
-                                    background: 'rgba(255, 255, 255, 0.8)',
-                                    backdropFilter: 'blur(4px)',
-                                    border: '1px solid #e2e8f0',
-                                    borderRadius: '0.5rem',
-                                }}
-                                formatter={(value: number) => [(value ?? 0).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }), 'Toplam Bağış']}
-                            />
-                            <Legend />
-                            <Line type="monotone" dataKey="value" name="Bağış" stroke="#0A84FF" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                        </LineChart>
-                    </ResponsiveContainer>
-                )}
-            </div>
-        </div>
-    );
-};
+// Quick Action Card Component
+const QuickActionCard: React.FC<{
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  color: string;
+  onClick: () => void;
+}> = ({ title, description, icon, color, onClick }) => (
+  <ModernCard variant="interactive" className="group cursor-pointer" onClick={onClick}>
+    <div className="flex items-center gap-4">
+      <div className={`w-12 h-12 bg-gradient-to-r ${color} rounded-xl flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300`}>
+        {icon}
+      </div>
+      <div className="flex-1">
+        <h4 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{title}</h4>
+        <p className="text-sm text-gray-500">{description}</p>
+      </div>
+      <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+    </div>
+  </ModernCard>
+);
 
+const Dashboard: React.FC = () => {
+    const { data, isLoading: loading, error } = useDashboardData();
+    const navigate = ReactRouterDOM.useNavigate();
 
-const Dashboard = () => {
-    const { data, isLoading, error, refresh } = useDashboardData();
+    const stats = data?.stats;
+    const recentActivities = data?.recentActivities;
+    const monthlyData = data?.monthlyDonationData;
 
-    if (isLoading) {
+    // Mock data for enhanced charts
+    const pieData = [
+        { name: 'Nakit Bağış', value: 45, color: '#3b82f6' },
+        { name: 'Ayni Yardım', value: 30, color: '#10b981' },
+        { name: 'Kurban', value: 15, color: '#f59e0b' },
+        { name: 'Diğer', value: 10, color: '#ef4444' },
+    ];
+
+    const quickActions = [
+        {
+            title: "Yeni Kişi Ekle",
+            description: "Sisteme yeni kişi kaydı oluştur",
+            icon: <Users className="h-6 w-6" />,
+            color: "from-blue-500 to-indigo-600",
+            onClick: () => navigate('/kisiler')
+        },
+        {
+            title: "Bağış Kayd��",
+            description: "Yeni bağış işlemi kaydet",
+            icon: <Heart className="h-6 w-6" />,
+            color: "from-rose-500 to-pink-600",
+            onClick: () => navigate('/bagis-yonetimi')
+        },
+        {
+            title: "Yardım Başvurusu",
+            description: "Yeni yardım talebi oluştur",
+            icon: <Target className="h-6 w-6" />,
+            color: "from-emerald-500 to-teal-600",
+            onClick: () => navigate('/yardimlar')
+        },
+        {
+            title: "Rapor Oluştur",
+            description: "Detaylı analitik raporu hazırla",
+            icon: <BarChart3 className="h-6 w-6" />,
+            color: "from-purple-500 to-violet-600",
+            onClick: () => navigate('/raporlama-analitik')
+        }
+    ];
+
+    if (loading) {
         return (
-            <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                    <StatCardSkeleton />
-                    <StatCardSkeleton />
-                    <StatCardSkeleton />
-                    <StatCardSkeleton />
-                </div>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                    <div className="lg:col-span-2">
-                        <ChartSkeleton height={288} />
-                    </div>
-                    <div>
-                        <ActivityListSkeleton items={5} />
+            <div className="p-8 space-y-8 bg-gradient-to-br from-gray-50 to-blue-50/30 min-h-screen">
+                <div className="animate-pulse space-y-8">
+                    <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {[...Array(4)].map((_, i) => (
+                            <div key={i} className="h-32 bg-gray-200 rounded-2xl"></div>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -157,70 +197,237 @@ const Dashboard = () => {
 
     if (error) {
         return (
-            <div className="flex items-center justify-center h-full">
-                <div className="text-center p-6 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
-                    <div className="text-red-600 dark:text-red-400 mb-4">
-                        <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                        </svg>
+            <div className="p-8 bg-gradient-to-br from-gray-50 to-blue-50/30 min-h-screen">
+                <ModernCard variant="default" className="text-center">
+                    <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full">
+                        <AlertTriangle className="h-8 w-8 text-red-600" />
                     </div>
-                    <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">Veri Yüklenemedi</h3>
-                    <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
-                    <button 
-                        onClick={refresh}
-                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                    >
-                        Tekrar Dene
-                    </button>
-                </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Veri Yüklenemedi</h3>
+                    <p className="text-gray-600 mb-4">{error}</p>
+                    <ModernButton variant="primary" onClick={() => window.location.reload()}>
+                        Yeniden Dene
+                    </ModernButton>
+                </ModernCard>
             </div>
         );
     }
 
-    const { stats } = data;
-
-    // Güvenli değer kontrolü için yardımcı fonksiyon
-    const safeNumber = (value: number | undefined): number => value ?? 0;
-    const safeCurrency = (value: number | undefined): string => {
-        return safeNumber(value).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' });
-    };
-
     return (
-        <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">
-             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                <StatCard 
-                    title="Toplam Üye Sayısı" 
-                    value={safeNumber(stats?.totalMembers)} 
-                    icon={ICONS.PEOPLE} 
-                    color="primary"
-                />
-                <StatCard 
-                    title="Bu Ayki Bağışlar" 
-                    value={safeCurrency(stats?.monthlyDonations)} 
-                    icon={ICONS.DONATION} 
-                    color="success"
-                />
-                <StatCard 
-                    title="Aktif Projeler" 
-                    value={safeNumber(stats?.activeProjects)} 
-                    icon={ICONS.CLIPBOARD_DOCUMENT_LIST} 
-                    color="primary"
-                />
-                <StatCard 
-                    title="Bekleyen Başvurular" 
-                    value={safeNumber(stats?.pendingApplications)} 
-                    icon={ICONS.AID_RECIPIENT} 
-                    color="warning"
-                />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-                    <MonthlyDonationsChart data={data.monthlyDonationData} />
+        <div className="p-8 space-y-8 bg-gradient-to-br from-gray-50 to-blue-50/30 min-h-screen">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                        Dashboard
+                        <Sparkles className="inline-block h-8 w-8 text-blue-500 ml-2" />
+                    </h1>
+                    <p className="text-gray-600">Kafkasder yönetim sistemi genel görünümü</p>
                 </div>
-                <div className="space-y-4 sm:space-y-6">
-                    <RecentActivityList activities={data.recentActivities} />
+                
+                <div className="flex items-center gap-3">
+                    <ModernButton variant="outline" icon={<Filter className="h-4 w-4" />}>
+                        Filtrele
+                    </ModernButton>
+                    <ModernButton variant="outline" icon={<Download className="h-4 w-4" />}>
+                        Dışa Aktar
+                    </ModernButton>
+                    <ModernButton variant="primary" icon={<RefreshCw className="h-4 w-4" />}>
+                        Yenile
+                    </ModernButton>
                 </div>
             </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <ModernStatCard
+                    title="Toplam Kişi"
+                    value={stats?.totalPeople || 0}
+                    icon={<Users className="h-6 w-6" />}
+                    change={12}
+                    changeType="increase"
+                    color="from-blue-500 to-indigo-600"
+                    subtitle="Bu ay +45 yeni kayıt"
+                    loading={loading}
+                />
+                <ModernStatCard
+                    title="Toplam Bağış"
+                    value={`₺${(stats?.totalDonations || 0).toLocaleString()}`}
+                    icon={<Heart className="h-6 w-6" />}
+                    change={8}
+                    changeType="increase"
+                    color="from-rose-500 to-pink-600"
+                    subtitle="Bu ay ₺125.450"
+                    loading={loading}
+                />
+                <ModernStatCard
+                    title="Aktif Projeler"
+                    value={stats?.activeProjects || 0}
+                    icon={<Target className="h-6 w-6" />}
+                    change={3}
+                    changeType="decrease"
+                    color="from-emerald-500 to-teal-600"
+                    subtitle="12 proje tamamlandı"
+                    loading={loading}
+                />
+                <ModernStatCard
+                    title="Bu Ay Yardım"
+                    value={stats?.monthlyAid || 0}
+                    icon={<Award className="h-6 w-6" />}
+                    change={15}
+                    changeType="increase"
+                    color="from-purple-500 to-violet-600"
+                    subtitle="285 aile yardım aldı"
+                    loading={loading}
+                />
+            </div>
+
+            {/* Quick Actions */}
+            <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Hızlı İşlemler</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {quickActions.map((action, index) => (
+                        <QuickActionCard key={index} {...action} />
+                    ))}
+                </div>
+            </div>
+
+            {/* Charts and Data */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Monthly Trend Chart */}
+                <ModernCard variant="default" className="lg:col-span-2">
+                    <ModernCardHeader
+                        title="Aylık Trendler"
+                        subtitle="Son 12 ayın karşılaştırılması"
+                        icon={<LineChartIcon className="h-5 w-5" />}
+                        actions={
+                            <div className="flex gap-2">
+                                <ModernButton variant="ghost" size="sm">Bağışlar</ModernButton>
+                                <ModernButton variant="ghost" size="sm">Yardımlar</ModernButton>
+                            </div>
+                        }
+                    />
+                    <ModernCardContent>
+                        <div className="h-80">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={monthlyData}>
+                                    <defs>
+                                        <linearGradient id="colorDonations" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                                        </linearGradient>
+                                        <linearGradient id="colorAid" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                                    <XAxis dataKey="month" stroke="#6b7280" />
+                                    <YAxis stroke="#6b7280" />
+                                    <Tooltip 
+                                        contentStyle={{
+                                            backgroundColor: 'white',
+                                            border: 'none',
+                                            borderRadius: '12px',
+                                            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+                                        }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="donations"
+                                        stroke="#3b82f6"
+                                        strokeWidth={3}
+                                        fillOpacity={1}
+                                        fill="url(#colorDonations)"
+                                        name="Bağışlar"
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="aid"
+                                        stroke="#10b981"
+                                        strokeWidth={3}
+                                        fillOpacity={1}
+                                        fill="url(#colorAid)"
+                                        name="Yardımlar"
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </ModernCardContent>
+                </ModernCard>
+
+                {/* Pie Chart */}
+                <ModernCard variant="default">
+                    <ModernCardHeader
+                        title="Bağış Dağılımı"
+                        subtitle="Kategorilere göre dağılım"
+                        icon={<PieChartIcon className="h-5 w-5" />}
+                    />
+                    <ModernCardContent>
+                        <div className="h-80">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={pieData}
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={80}
+                                        fill="#8884d8"
+                                        dataKey="value"
+                                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                    >
+                                        {pieData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </ModernCardContent>
+                </ModernCard>
+            </div>
+
+            {/* Recent Activities */}
+            <ModernCard variant="default">
+                <ModernCardHeader
+                    title="Son Aktiviteler"
+                    subtitle="Sistemdeki en son işlemler"
+                    icon={<Activity className="h-5 w-5" />}
+                    actions={
+                        <ModernButton variant="ghost" size="sm" icon={<ChevronRight className="h-4 w-4" />}>
+                            Tümünü Gör
+                        </ModernButton>
+                    }
+                />
+                <ModernCardContent>
+                    <div className="space-y-4">
+                        {recentActivities?.slice(0, 6).map((activity: RecentActivity, index: number) => (
+                            <div key={index} className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors group">
+                                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <CheckCircle className="h-5 w-5 text-white" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <SafeActivityDescription description={activity.description} />
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <Clock className="h-4 w-4 text-gray-400" />
+                                        <span className="text-xs text-gray-500">{timeSince(activity.timestamp)}</span>
+                                        {activity.type && (
+                                            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                                                {activity.type}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )) || (
+                            <div className="text-center py-8 text-gray-500">
+                                <Activity className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                                <p>Henüz aktivite bulunmuyor</p>
+                            </div>
+                        )}
+                    </div>
+                </ModernCardContent>
+            </ModernCard>
         </div>
     );
 };

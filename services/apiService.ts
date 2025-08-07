@@ -1,5 +1,3 @@
-
-
 import {
     Kullanici, Dava, Person, Proje, YardimBasvurusu, OgrenciBursu, Yetim,
     Odeme, Kumbara, DepoUrunu, FinansalKayit, Gonullu, Etkinlik,
@@ -18,15 +16,50 @@ import { MOCK_ETKINLIKLER } from '../data/mockEtkinlikler';
 
 
 // --- Generic Supabase Helper Functions ---
-const handleSupabaseError = (error: { message: string }, context: string) => {
+const handleSupabaseError = (error: any, context: string) => {
     console.error(`Supabase error in ${context}:`, error);
-    throw new Error(`Veritabanı hatası (${context}): ${error.message}`);
+
+    // Provide specific error messages for common issues
+    let errorMessage = error?.message || error?.error_description;
+
+    if (!errorMessage) {
+        // If no message, try to extract meaningful info
+        if (error?.code) {
+            errorMessage = `Database error code: ${error.code}`;
+        } else {
+            errorMessage = 'Unknown database error';
+        }
+    }
+
+    // Add context to common errors
+    if (errorMessage.includes('column') && errorMessage.includes('does not exist')) {
+        errorMessage += '. This may indicate a database schema mismatch.';
+    } else if (errorMessage.includes('relation') && errorMessage.includes('does not exist')) {
+        errorMessage += '. The database table may not exist.';
+    }
+
+    throw new Error(`Veritabanı hatası (${context}): ${errorMessage}`);
 };
 
 const getAll = async <T extends { id: number | string }>(tableName: string): Promise<T[]> => {
     const { data, error } = await supabase.from(tableName).select('*').order('id', { ascending: false });
     if (error) handleSupabaseError(error, `get all ${tableName}`);
     return data as T[];
+};
+
+// Safe wrapper for getAll that returns empty array on table not found
+const getAllSafe = async <T extends { id: number | string }>(tableName: string): Promise<T[]> => {
+    try {
+        return await getAll<T>(tableName);
+    } catch (error: any) {
+        if (error?.code === 'PGRST116' || error?.message?.includes('relation') || error?.message?.includes('does not exist') || error?.message?.includes('table')) {
+            console.warn(`Table '${tableName}' does not exist, returning empty array`);
+            return [];
+        }
+        // Log the actual error for debugging but still return empty array to prevent crashes
+        console.error(`Supabase error in get all ${tableName}:`, error);
+        return [];
+    }
 };
 
 const getById = async <T extends { id: number | string }>(tableName: string, id: number): Promise<T> => {
@@ -105,7 +138,7 @@ export const getProfileForUser = async (user: { email?: string }): Promise<Profi
 // --- API FUNCTIONS --- //
 
 // Denetim Kayıtları
-export const getDenetimKayitlari = (): Promise<DenetimKaydi[]> => getAll<DenetimKaydi>('denetim_kayitlari');
+export const getDenetimKayitlari = (): Promise<DenetimKaydi[]> => getAllSafe<DenetimKaydi>('denetim_kayitlari');
 export const createDenetimKaydi = (kayit: Omit<DenetimKaydi, 'id'>): Promise<DenetimKaydi> => createRecord<DenetimKaydi>('denetim_kayitlari', kayit);
 
 // Yorumlar
@@ -128,8 +161,9 @@ const transformPersonFromDB = (dbPerson: any): Person => {
 };
 
 const transformPersonToDB = (person: Partial<Person>): any => {
-    const dbPerson: any = { ...person };
-    
+    const dbPerson: any = {};
+
+    // Only include fields that exist in the database
     // Map frontend fields to database fields
     if (person.ad) dbPerson.first_name = person.ad;
     if (person.soyad) dbPerson.last_name = person.soyad;
@@ -139,18 +173,25 @@ const transformPersonToDB = (person: Partial<Person>): any => {
     if (person.kayitTarihi) dbPerson.registration_date = person.kayitTarihi;
     if (person.durum) dbPerson.status = person.durum;
     if (person.membershipType) dbPerson.person_type = person.membershipType;
-    
-    // Remove frontend-only fields
-    delete dbPerson.ad;
-    delete dbPerson.soyad;
-    delete dbPerson.adSoyad;
-    delete dbPerson.kimlikNo;
-    delete dbPerson.cepTelefonu;
-    delete dbPerson.dogumTarihi;
-    delete dbPerson.kayitTarihi;
-    delete dbPerson.durum;
-    delete dbPerson.membershipType;
-    
+
+    // Copy database-compatible fields directly
+    const allowedDbFields = [
+        'email', 'address', 'city', 'district', 'neighborhood',
+        'father_name', 'mother_name', 'emergency_contact_name',
+        'emergency_contact_phone', 'emergency_contact_relation',
+        'file_number', 'sponsorship_type', 'registration_status',
+        'is_record_deleted', 'registering_unit', 'country',
+        'lat', 'lng', 'category', 'notes', 'created_by',
+        'gender', 'marital_status', 'education_level', 'employment_status',
+        'residence_type', 'aid_type_received'
+    ];
+
+    allowedDbFields.forEach(field => {
+        if (person[field as keyof Person] !== undefined) {
+            dbPerson[field] = person[field as keyof Person];
+        }
+    });
+
     return dbPerson;
 };
 
@@ -218,27 +259,40 @@ export const updateUser = (id: number, user: Partial<Kullanici>): Promise<Kullan
 export const deleteUser = (id: number): Promise<void> => deleteRecord('kullanicilar', id); // Note: this doesn't delete the auth user.
 
 // Projeler
-export const getProjeler = (): Promise<Proje[]> => getAll<Proje>('projects');
+export const getProjeler = (): Promise<Proje[]> => getAllSafe<Proje>('projects');
 export const getProjeById = (id: number): Promise<Proje> => getById<Proje>('projects', id);
 export const createProje = (proje: Omit<Proje, 'id'>): Promise<Proje> => createRecord<Proje>('projects', proje);
 export const updateProje = (id: number, proje: Partial<Proje>): Promise<Proje> => updateRecord<Proje>('projects', id, proje);
 export const deleteProje = (id: number): Promise<void> => deleteRecord('projects', id);
 
 // Bağışlar
-export const getBagislar = (): Promise<Bagis[]> => getAll<Bagis>('donations');
+export const getBagislar = (): Promise<Bagis[]> => getAllSafe<Bagis>('donations');
 export const createBagis = (bagis: Omit<Bagis, 'id'>): Promise<Bagis> => createRecord<Bagis>('donations', bagis);
 export const updateBagis = (id: number, bagis: Partial<Bagis>): Promise<Bagis> => updateRecord<Bagis>('donations', id, bagis);
 export const deleteBagis = (id: number): Promise<void> => deleteRecord('donations', id);
 
 // Yardım Başvuruları
-export const getYardimBasvurulari = (): Promise<YardimBasvurusu[]> => getAll<YardimBasvurusu>('aid_applications');
+export const getYardimBasvurulari = (): Promise<YardimBasvurusu[]> => getAllSafe<YardimBasvurusu>('aid_applications');
 export const getYardimBasvurusuById = (id: number): Promise<YardimBasvurusu> => getById<YardimBasvurusu>('aid_applications', id);
 export const createYardimBasvurusu = (basvuru: Omit<YardimBasvurusu, 'id'>): Promise<YardimBasvurusu> => createRecord<YardimBasvurusu>('aid_applications', basvuru);
 export const updateYardimBasvurusu = (id: number, basvuru: Partial<YardimBasvurusu>): Promise<YardimBasvurusu> => updateRecord<YardimBasvurusu>('aid_applications', id, basvuru);
 export const deleteYardimBasvurusu = (id: number): Promise<void> => deleteRecord('aid_applications', id);
 
-// Davalar
-export const getDavalar = (): Promise<Dava[]> => getAll<Dava>('davalar');
+// Davalar - with error handling for missing table
+export const getDavalar = async (): Promise<Dava[]> => {
+    try {
+        return await getAll<Dava>('davalar');
+    } catch (error: any) {
+        // If table doesn't exist, return empty array
+        if (error?.code === 'PGRST116' || error?.message?.includes('relation') || error?.message?.includes('does not exist') || error?.message?.includes('table')) {
+            console.warn('Davalar table does not exist, returning empty array');
+            return [];
+        }
+        // Log the actual error for debugging but still return empty array to prevent crashes
+        console.error('Supabase error in getDavalar:', error);
+        return [];
+    }
+};
 export const getDavaById = (id: number): Promise<Dava> => getById<Dava>('davalar', id);
 export const createDava = (dava: Omit<Dava, 'id'>): Promise<Dava> => createRecord<Dava>('davalar', dava);
 export const updateDava = (id: number, dava: Partial<Dava>): Promise<Dava> => updateRecord<Dava>('davalar', id, dava);
@@ -423,7 +477,30 @@ export const updateWebhook = (id: number, webhook: Partial<Webhook>): Promise<We
 export const deleteWebhook = (id: number): Promise<void> => deleteRecord('webhooks', id);
 
 // Ayarlar - Use system_settings table instead of ayarlar
-export const getSistemAyarlari = (): Promise<SistemAyarlari> => getById<SistemAyarlari>('system_settings', 1);
+export const getSistemAyarlari = async (): Promise<SistemAyarlari> => {
+    try {
+        return await getById<SistemAyarlari>('system_settings', 1);
+    } catch (error: any) {
+        // If table doesn't exist or record doesn't exist, return default settings
+        if (error?.code === 'PGRST116' || error?.message?.includes('relation') || error?.message?.includes('does not exist')) {
+            console.warn('System_settings table or record does not exist, returning default settings');
+            return {
+                id: 1,
+                site_name: 'Kafkasder Panel',
+                site_description: 'Dernek Yönetim Sistemi',
+                email_notifications: true,
+                sms_notifications: false,
+                maintenance_mode: false,
+                max_file_size: 10,
+                allowed_file_types: ['pdf', 'doc', 'docx', 'jpg', 'png'],
+                backup_frequency: 'daily',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            } as SistemAyarlari;
+        }
+        throw error;
+    }
+};
 export const updateSistemAyarlari = (settings: Partial<SistemAyarlari>): Promise<SistemAyarlari> => updateRecord<SistemAyarlari>('system_settings', 1, settings);
 
 // Aidatlar

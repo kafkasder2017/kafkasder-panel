@@ -44,9 +44,12 @@ const KullaniciYonetimi: React.FC = () => {
 
     const filteredKullanicilar = useMemo(() => {
         return kullanicilar.filter(kullanici => {
+            // Filter out null or undefined entries
+            if (!kullanici) return false;
+
             const lowerSearch = filters.searchTerm.toLowerCase();
-            const matchesSearch = kullanici.kullanici_adi.toLowerCase().includes(lowerSearch) ||
-                                  kullanici.email.toLowerCase().includes(lowerSearch);
+            const matchesSearch = kullanici.kullanici_adi?.toLowerCase().includes(lowerSearch) ||
+                                  kullanici.email?.toLowerCase().includes(lowerSearch);
             const matchesRole = filters.roleFilter === 'all' || kullanici.rol === filters.roleFilter;
             const matchesStatus = filters.statusFilter === 'all' || kullanici.durum === filters.statusFilter;
             return matchesSearch && matchesRole && matchesStatus;
@@ -97,17 +100,17 @@ const KullaniciYonetimi: React.FC = () => {
     };
 
     const columns = useMemo(() => [
-        { key: 'kullanici_adi', title: 'Kullanıcı Adı', render: (k: Kullanici) => k.kullanici_adi },
-        { key: 'email', title: 'E-posta', render: (k: Kullanici) => k.email },
-        { key: 'rol', title: 'Rol', render: (k: Kullanici) => <span className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleClass(k.rol)}`}>{getRoleDisplayName(k.rol)}</span> },
-        { key: 'son_giris', title: 'Son Giriş', render: (k: Kullanici) => k.son_giris ? new Date(k.son_giris).toLocaleString('tr-TR') : 'Hiç' },
-        { key: 'durum', title: 'Durum', render: (k: Kullanici) => <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusClass(k.durum)}`}>{k.durum}</span> },
-        { key: 'actions', title: 'İşlemler', render: (k: Kullanici) => (
+        { key: 'kullanici_adi', title: 'Kullanıcı Adı', render: (k: Kullanici) => k?.kullanici_adi || '-' },
+        { key: 'email', title: 'E-posta', render: (k: Kullanici) => k?.email || '-' },
+        { key: 'rol', title: 'Rol', render: (k: Kullanici) => k ? <span className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleClass(k.rol)}`}>{getRoleDisplayName(k.rol)}</span> : '-' },
+        { key: 'son_giris', title: 'Son Giriş', render: (k: Kullanici) => k?.son_giris ? new Date(k.son_giris).toLocaleString('tr-TR') : 'Hiç' },
+        { key: 'durum', title: 'Durum', render: (k: Kullanici) => k ? <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusClass(k.durum)}`}>{k.durum}</span> : '-' },
+        { key: 'actions', title: 'İşlemler', render: (k: Kullanici) => k ? (
              <div className="flex items-center justify-end space-x-1">
                 <Button variant="ghost" size="sm" onClick={() => { setEditingKullanici(k); setIsModalOpen(true); }}>Düzenle</Button>
                 <Button variant="ghost" size="sm" onClick={() => toggleUserStatus(k)}>{k.durum === 'Aktif' ? 'Pasif Yap' : 'Aktif Yap'}</Button>
             </div>
-        )}
+        ) : null}
     ], []);
 
     if (isLoading) return <div className="flex items-center justify-center h-full"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div></div>;

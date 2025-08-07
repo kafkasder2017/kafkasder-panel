@@ -65,7 +65,6 @@ const BagisciYonetimi: React.FC = () => {
                         file_number: bagisciToSave.file_number || `DN${Date.now()}`,
                         sponsorship_type: bagisciToSave.sponsorship_type || SponsorlukTipi.YOK,
                         registration_status: bagisciToSave.registration_status || 'Kaydedildi',
-                        consent_statement: bagisciToSave.consent_statement || RizaBeyaniStatus.ALINDI,
                         bagisYapti: true
                     } as Omit<Person, 'id'>;
                     await createPerson(payload);
