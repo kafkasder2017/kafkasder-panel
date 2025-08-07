@@ -190,8 +190,8 @@ const Dashboard = () => {
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200">🎨 Yeni Tasarım Sistemi</h3>
-                        <p className="text-sm text-blue-600 dark:text-blue-300">Modern sidebar, temizlenmiş iconlar ve entegrasyon rehberleri</p>
+                        <h3 className="text-lg font-semibold text-green-800 dark:text-green-200">✅ KafkasderSidebar Entegre Edildi!</h3>
+                        <p className="text-sm text-green-600 dark:text-green-300">Modern sidebar aktif! Artık uygulama yeni tasarım sistemiyle çalışıyor.</p>
                     </div>
                     <div className="flex gap-2 flex-wrap">
                         <ReactRouterDOM.Link
