@@ -191,14 +191,22 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200">🎨 Yeni Sidebar Tasarımı</h3>
-                        <p className="text-sm text-blue-600 dark:text-blue-300">Modern ve gelişmiş sidebar tasarımını önizleyin</p>
+                        <p className="text-sm text-blue-600 dark:text-blue-300">Modern ve gelişmiş sidebar tasarımını önizleyin ve entegre edin</p>
                     </div>
-                    <ReactRouterDOM.Link
-                        to="/new-sidebar-demo"
-                        className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105"
-                    >
-                        Demo'yu Görüntüle
-                    </ReactRouterDOM.Link>
+                    <div className="flex gap-3">
+                        <ReactRouterDOM.Link
+                            to="/sidebar-integration-guide"
+                            className="bg-white dark:bg-gray-800 border border-blue-300 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                        >
+                            Entegrasyon Rehberi
+                        </ReactRouterDOM.Link>
+                        <ReactRouterDOM.Link
+                            to="/new-sidebar-demo"
+                            className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105"
+                        >
+                            Demo'yu Görüntüle
+                        </ReactRouterDOM.Link>
+                    </div>
                 </div>
             </div>
 
