@@ -49,7 +49,7 @@ export function KafkasderSidebar({ activeSection, onSectionChange }: KafkasderSi
         { id: "depo-yonetimi", label: "Depo & Stok Yönetimi", icon: Package, path: "/depo-yonetimi" },
         { id: "vefa-destek", label: "Vefa Destek Yönetimi", icon: Shield, path: "/vefa-destek" },
         { id: "burslar", label: "Burs Yönetimi", icon: GraduationCap, path: "/burslar" },
-        { id: "yetimler", label: "Yetim Yönetimi", icon: UserHeart, path: "/yetimler" },
+        { id: "yetimler", label: "Yetim Yönetimi", icon: Heart, path: "/yetimler" },
         { id: "hukuki-yardim", label: "Hukuk Yönetimi", icon: Scale, path: "/hukuki-yardim" },
       ]
     },
