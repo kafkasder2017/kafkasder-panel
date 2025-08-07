@@ -6,11 +6,15 @@ import { useBagisYonetimi } from '../hooks/useData';
 import { usePDFGenerator } from '../src/hooks/usePDFGenerator';
 import { useExcelUtils } from '../src/hooks/useExcelUtils';
 import Modal from './Modal';
+import { ModernCard, ModernCardHeader, ModernCardContent } from './ui/ModernCard';
+import { ModernButton } from './ui/ModernButton';
+import { ModernInput } from './ui/ModernInput';
 import { PageHeader, StatCard, Table, Input, Select, Textarea, Button } from './ui';
 import AdvancedFilter from '../src/components/AdvancedFilter';
 import SmartSearch from '../src/components/SmartSearch';
 import { formatCurrency, formatDate } from '../utils/format';
 import { filterItems, sortItems } from '../utils/list';
+import { Heart, DollarSign, Receipt, Download, Upload, Filter, Plus, TrendingUp, Users, Calendar, Sparkles, CheckCircle, AlertTriangle, Edit, Trash2, Eye } from 'lucide-react';
 
 interface BagisYonetimiProps {
     initialFilter?: BagisTuru | 'all';
@@ -40,11 +44,9 @@ const BagisYonetimi: React.FC<BagisYonetimiProps> = ({ initialFilter = 'all' }) 
     const peopleMap = useMemo(() => new Map(people.map(p => [String(p.id), `${(p as any).ad ?? p.first_name ?? ''} ${(p as any).soyad ?? p.last_name ?? ''}`.trim()])), [people]);
     const projectsMap = useMemo(() => new Map(projects.map(p => [String(p.id), p.name])), [projects]);
 
-    // Sayfalama durumu
     const [page, setPage] = useState(1);
     const pageSize = 20;
 
-    // Arama debouncing
     useEffect(() => {
         const t = setTimeout(() => {
             setDebouncedQuery(filters.searchTerm || '');
@@ -80,368 +82,506 @@ const BagisYonetimi: React.FC<BagisYonetimiProps> = ({ initialFilter = 'all' }) 
         };
     }, [donations, debouncedQuery, filters.typeFilter, peopleMap]);
 
-    // Sanallaştırma: bağımlılıksız windowing (Table bileşeni yerine yalın liste render)
-    const containerRef = useRef<HTMLDivElement>(null);
-    const rowHeight = 56; // px, satır başı yükseklik
-    const overscan = 8;
-
-    const [scrollTop, setScrollTop] = useState(0);
-    const [viewportHeight, setViewportHeight] = useState(600);
-
-    const onScroll = useCallback(() => {
-        if (!containerRef.current) return;
-        setScrollTop(containerRef.current.scrollTop);
-    }, []);
-
-    useEffect(() => {
-        const el = containerRef.current;
-        if (!el) return;
-        const handleResize = () => setViewportHeight(el.clientHeight);
-        handleResize();
-        el.addEventListener('scroll', onScroll, { passive: true });
-        window.addEventListener('resize', handleResize);
-        return () => {
-            el.removeEventListener('scroll', onScroll);
-            window.removeEventListener('resize', handleResize);
-        };
-    }, [onScroll]);
-
-    const total = filteredDonations.length;
-    const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan);
-    const endIndex = Math.min(
-        total,
-        Math.ceil((scrollTop + viewportHeight) / rowHeight) + overscan
-    );
-    const virtualItems = filteredDonations.slice(startIndex, endIndex);
-    const topSpacer = startIndex * rowHeight;
-    const bottomSpacer = (total - endIndex) * rowHeight;
-
-    const handleSaveDonation = async (donationToSave: Partial<Bagis>) => {
-        const isNew = !donationToSave.id;
-        const promise = isNew
-            ? createBagis(donationToSave as Omit<Bagis, 'id'>)
-            : updateBagis(donationToSave.id!, donationToSave);
-
-        toast.promise(promise, {
-            loading: 'Kaydediliyor...',
-            success: () => {
-                refresh();
-                setIsFormModalOpen(false);
-                setEditingDonation(null);
-                return isNew ? 'Bağış başarıyla eklendi!' : 'Bağış başarıyla güncellendi!';
-            },
-            error: 'Bir hata oluştu.',
-        });
-    };
-    
-    const handleDeleteClick = (id: number) => {
-        if(window.confirm('Bu bağış kaydını silmek istediğinizden emin misiniz?')) {
-            toast.promise(deleteBagis(id), {
-                loading: 'Siliniyor...',
-                success: () => {
-                    refresh();
-                    return 'Bağış başarıyla silindi!';
-                },
-                error: 'Bir hata oluştu.',
-            });
-        }
+    const handleAddDonation = () => {
+        setEditingDonation({});
+        setIsFormModalOpen(true);
     };
 
-    const handleExportExcel = () => {
-        exportDonations(filteredDonations);
+    const handleEditDonation = (donation: Bagis) => {
+        setEditingDonation(donation);
+        setIsFormModalOpen(true);
     };
 
-    const handleImportExcel = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        const result = await importDonations(file);
-        if (result && result.validRows > 0) {
-            // Refresh the data after successful import
+    const handleSaveDonation = async (donationData: Partial<Bagis>) => {
+        try {
+            if (donationData.id) {
+                await updateBagis(donationData.id, donationData);
+                toast.success('Bağış bilgileri güncellendi');
+            } else {
+                await createBagis(donationData);
+                toast.success('Yeni bağış kaydedildi');
+            }
+            setIsFormModalOpen(false);
+            setEditingDonation(null);
             refresh();
+        } catch (error) {
+            toast.error('İşlem sırasında hata oluştu');
         }
-        
-        // Reset file input
-        event.target.value = '';
     };
 
-    const handleGenerateTemplate = () => {
-        generateDonationTemplate();
-    };
-
-    const columns = useMemo(() => [
-        { key: 'bagisciId', title: 'Bağışçı', render: (d: Bagis) => peopleMap.get(String(d.bagisciId)) || 'Bilinmeyen Kişi' },
-        { key: 'tutar', title: 'Tutar', render: (d: Bagis) => <span className="font-semibold text-green-600">{formatCurrency(d.tutar ?? 0, d.paraBirimi || 'TRY')}</span> },
-        { key: 'bagisTuru', title: 'Tür', render: (d: Bagis) => d.bagisTuru },
-        { key: 'tarih', title: 'Tarih', render: (d: Bagis) => formatDate(d.tarih) },
-        { key: 'projeId', title: 'İlişkili Proje', render: (d: Bagis) => (d && typeof d.projeId !== 'undefined' && d.projeId !== null) ? (projectsMap.get(String(d.projeId)) || '-') : '-' },
-        { key: 'actions', title: 'İşlemler', render: (d: Bagis) => (
-             <div className="flex items-center justify-end space-x-1">
-                <Button variant="ghost" size="sm" onClick={() => { setReceiptDonation(d); setIsReceiptModalOpen(true); }}>Makbuz</Button>
-                <Button variant="ghost" size="sm" onClick={() => { setEditingDonation(d); setIsFormModalOpen(true); }}>Düzenle</Button>
-                <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700" onClick={() => handleDeleteClick(d.id)}>Sil</Button>
-            </div>
-        )}
-    ], [peopleMap, projectsMap]);
-
-    if (isLoading) return <div className="flex items-center justify-center h-full"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div></div>;
-    if (error) return <div className="p-4 bg-red-100 text-red-700 rounded-lg">{error}</div>;
-
-    return (
-        <>
-            <PageHeader title="Bağış Yönetimi">
-                <div className="flex items-center gap-2">
-                    <div className="relative">
-                        <input
-                            type="file"
-                            accept=".xlsx,.xls"
-                            onChange={handleImportExcel}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                            disabled={isImporting}
-                        />
-                        <Button 
-                            disabled={isImporting}
-                            variant="outline"
-                            className="bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
-                        >
-                            {isImporting ? 'İçe Aktarılıyor...' : 'Excel\'den İçe Aktar'}
-                        </Button>
-                    </div>
-                    <Button 
-                        onClick={handleGenerateTemplate}
-                        variant="outline"
-                        className="bg-orange-600 text-white hover:bg-orange-700"
-                    >
-                        Template İndir
-                    </Button>
-                    <Button 
-                        onClick={handleExportExcel} 
-                        disabled={isExporting || filteredDonations.length === 0}
-                        variant="outline"
-                        className="bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
-                    >
-                        {isExporting ? 'Dışa Aktarılıyor...' : 'Excel\'e Aktar'}
-                    </Button>
-                    <Button 
-                        onClick={() => generateDonationReport(filteredDonations)} 
-                        disabled={isGenerating || filteredDonations.length === 0}
-                        variant="outline"
-                        className="bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
-                    >
-                        {isGenerating ? 'PDF Oluşturuluyor...' : 'PDF Rapor'}
-                    </Button>
-                    <Button onClick={() => { setEditingDonation({}); setIsFormModalOpen(true); }}>Yeni Bağış Ekle</Button>
-                </div>
-            </PageHeader>
-            <div className="space-y-6">
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <StatCard title="Bu Ayki Toplam Bağış" value={formatCurrency(monthlyTotal ?? 0, 'TRY')} color="success" icon={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" /></svg>} />
-                    <StatCard title="Toplam Bağışçı Sayısı" value={donorCount.toString()} color="primary" icon={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-2.308l.143-.143-1.05-1.05a2.25 2.25 0 0 1-1.586-.858c-.035-.052-.072-.105-.108-.158l-1.3-1.3a2.25 2.25 0 0 0-3.182 0l-1.3 1.3a2.25 2.25 0 0 1-1.585.858l-1.05 1.05a9.337 9.337 0 0 0 4.121 2.308M15 19.128v-2.828l-1.3-1.3a2.25 2.25 0 0 0-3.182 0l-1.3 1.3a2.25 2.25 0 0 1-1.585.858l-1.05 1.05a9.337 9.337 0 0 0 4.121 2.308M12 6.75a2.25 2.25 0 1 1 0 4.5 2.25 2.25 0 0 1 0-4.5Zm0 0a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Zm-4.5 0a2.25 2.25 0 1 1 0 4.5 2.25 2.25 0 0 1 0-4.5Zm0 0a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Zm9 0a2.25 2.25 0 1 1 0 4.5 2.25 2.25 0 0 1 0-4.5Zm0 0a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" /></svg>} />
-                    <StatCard title="Ortalama Bağış Miktarı" value={formatCurrency(averageDonation ?? 0, 'TRY')} color="warning" icon={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" /></svg>} />
-                </div>
-                <div className="bg-white dark:bg-zinc-800 p-6 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700">
-                    {/* Akıllı Arama */}
-                    <SmartSearch
-                        onSearch={(query) => setFilters(f => ({ ...f, searchTerm: query }))}
-                        placeholder="Akıllı arama: 'büyük bağışlar' veya 'Ahmet' gibi sorguları deneyin..."
-                        className="mb-4"
-                    />
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <Select value={filters.typeFilter} onChange={e => { setPage(1); setFilters(f => ({...f, typeFilter: e.target.value as any}))}} options={[{value: 'all', label: 'Tüm Bağış Türleri'}, ...Object.values(BagisTuru).map(tur => ({value: tur, label: tur}))]} />
-                        <Button 
-                            variant="outline" 
-                            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                            className="flex items-center gap-2"
-                        >
-                            Gelişmiş Filtreler
-                        </Button>
-                    </div>
-                    
-                    {/* Gelişmiş Filtreler */}
-                    {showAdvancedFilters && (
-                        <AdvancedFilter
-                             filters={filters}
-                             onFiltersChange={setFilters}
-                             onClearAll={() => setFilters({ searchTerm: '', typeFilter: 'all' })}
-                            filterOptions={[
-                                {
-                                    key: 'bagisTuru',
-                                    label: 'Bağış Türü',
-                                    type: 'select',
-                                    options: Object.values(BagisTuru).map(tur => ({ value: tur, label: tur }))
-                                },
-                                {
-                                    key: 'amountMin',
-                                    label: 'Minimum Tutar',
-                                    type: 'number',
-                                    placeholder: 'Min tutar'
-                                },
-                                {
-                                    key: 'amountMax',
-                                    label: 'Maksimum Tutar',
-                                    type: 'number',
-                                    placeholder: 'Max tutar'
-                                },
-                                {
-                                    key: 'dateFrom',
-                                    label: 'Başlangıç Tarihi',
-                                    type: 'date'
-                                },
-                                {
-                                    key: 'dateTo',
-                                    label: 'Bitiş Tarihi',
-                                    type: 'date'
-                                }
-                            ]}
-                            className="mb-4"
-                        />
-                    )}
-                    
-                    {/* Sanallaştırılmış tablo görünümü */}
-                    <div className="mt-4 border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <div
-                                ref={containerRef}
-                                className="max-h-[70vh] overflow-y-auto"
-                                aria-label="Bağışlar Scroll Container"
-                            >
-                                <table className="w-full text-sm text-left text-zinc-600 dark:text-zinc-300">
-                                    <thead className="sticky top-0 z-10 text-xs text-zinc-700 dark:text-zinc-300 uppercase bg-zinc-50 dark:bg-zinc-800">
-                                        <tr>
-                                            <th className="px-4 py-3 font-semibold">Bağışçı</th>
-                                            <th className="px-4 py-3 font-semibold">Tutar</th>
-                                            <th className="px-4 py-3 font-semibold">Tür</th>
-                                            <th className="px-4 py-3 font-semibold">Tarih</th>
-                                            <th className="px-4 py-3 font-semibold">İlişkili Proje</th>
-                                            <th className="px-4 py-3 font-semibold text-right">İşlemler</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-zinc-200 dark:divide-zinc-700">
-                                        {topSpacer > 0 && (
-                                            <tr style={{ height: topSpacer }}>
-                                                <td colSpan={6} />
-                                            </tr>
-                                        )}
-
-                                        {virtualItems.map((d) => (
-                                            <tr key={d.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-700/50" style={{ height: rowHeight }}>
-                                                <td className="px-4 py-3">{peopleMap.get(String(d.bagisciId)) || 'Bilinmeyen Kişi'}</td>
-                                                <td className="px-4 py-3"><span className="font-semibold text-green-600">{formatCurrency(d.tutar ?? 0, d.paraBirimi || 'TRY')}</span></td>
-                                                <td className="px-4 py-3">{d.bagisTuru}</td>
-                                                <td className="px-4 py-3">{formatDate(d.tarih)}</td>
-                                                <td className="px-4 py-3">{(d && typeof d.projeId !== 'undefined' && d.projeId !== null) ? (projectsMap.get(String(d.projeId)) || '-') : '-'}</td>
-                                                <td className="px-4 py-3 text-right">
-                                                    <div className="flex items-center justify-end space-x-1">
-                                                        <Button variant="ghost" size="sm" onClick={() => { setReceiptDonation(d); setIsReceiptModalOpen(true); }}>Makbuz</Button>
-                                                        <Button variant="ghost" size="sm" onClick={() => { setEditingDonation(d); setIsFormModalOpen(true); }}>Düzenle</Button>
-                                                        <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700" onClick={() => handleDeleteClick(d.id)}>Sil</Button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-
-                                        {bottomSpacer > 0 && (
-                                            <tr style={{ height: bottomSpacer }}>
-                                                <td colSpan={6} />
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        {filteredDonations.length === 0 && (
-                            <div className="text-center py-10 text-zinc-500">
-                                <p>Gösterilecek bağış kaydı bulunamadı.</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {isFormModalOpen && editingDonation && (
-                <BagisFormModal
-                    donation={editingDonation}
-                    people={people}
-                    projects={projects}
-                    onClose={() => setIsFormModalOpen(false)}
-                    onSave={handleSaveDonation}
-                />
-            )}
-            {isReceiptModalOpen && receiptDonation && (
-                <MakbuzModal
-                    donation={receiptDonation}
-                    donorName={peopleMap.get(String(receiptDonation.bagisciId)) || 'Bilinmeyen Kişi'}
-                    onClose={() => setIsReceiptModalOpen(false)}
-                />
-            )}
-        </>
-    );
-};
-
-const BagisFormModal: React.FC<{ donation: Partial<Bagis>, people: Person[], projects: Proje[], onClose: () => void, onSave: (d: Partial<Bagis>) => void }> = ({ donation, people, projects, onClose, onSave }) => {
-    const [formData, setFormData] = useState<Partial<Bagis>>(donation);
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({...prev, [name]: name === 'tutar' || name === 'bagisciId' || name === 'projeId' ? parseFloat(value) || value : value}));
-    };
-    const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); onSave(formData); };
-    return (
-        <Modal isOpen={true} onClose={onClose} title={donation.id ? 'Bağış Düzenle' : 'Yeni Bağış Ekle'}>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="md:col-span-2"><Select label="Bağışçı" name="bagisciId" value={formData.bagisciId || ''} onChange={handleChange} options={[{value: '', label: 'Kişi seçin...'}, ...people.map(p => ({value: p.id, label: `${p.ad} ${p.soyad}`}))]} required /></div>
-                    <Input label="Tutar" type="number" step="0.01" name="tutar" value={formData.tutar || ''} onChange={handleChange} required />
-                    <Select label="Para Birimi" name="paraBirimi" value={formData.paraBirimi || 'TRY'} onChange={handleChange} options={[{value: 'TRY', label: 'TRY'}, {value: 'USD', label: 'USD'}, {value: 'EUR', label: 'EUR'}]} />
-                    <Select label="Bağış Türü" name="bagisTuru" value={formData.bagisTuru || ''} onChange={handleChange} options={[{value: '', label: 'Seçiniz...'}, ...Object.values(BagisTuru).map(t => ({value: t, label: t}))]} required />
-                    <Input label="Tarih" type="date" name="tarih" value={formData.tarih || new Date().toISOString().split('T')[0]} onChange={handleChange} required />
-                    <div className="md:col-span-2"><Select label="İlişkili Proje (İsteğe Bağlı)" name="projeId" value={formData.projeId || ''} onChange={handleChange} options={[{value: '', label: 'Yok'}, ...projects.map(p => ({value: p.id, label: p.name}))]} /></div>
-                    <div className="md:col-span-2"><Input label="Makbuz No" name="makbuzNo" value={formData.makbuzNo || ''} onChange={handleChange} /></div>
-                    <div className="md:col-span-2"><Textarea label="Açıklama" name="aciklama" value={formData.aciklama || ''} onChange={handleChange} rows={3} /></div>
-                </div>
-                <div className="pt-4 flex justify-end space-x-3">
-                    <Button type="button" variant="outline" onClick={onClose}>İptal</Button>
-                    <Button type="submit">Kaydet</Button>
-                </div>
-            </form>
-        </Modal>
-    );
-};
-
-const MakbuzModal: React.FC<{ donation: Bagis, donorName: string, onClose: () => void }> = ({ donation, donorName, onClose }) => {
-    const printAreaRef = useRef<HTMLDivElement>(null);
-    const handlePrint = () => {
-        const printContent = printAreaRef.current?.innerHTML;
-        if(printContent) {
-            const printWindow = window.open('', '_blank');
-            if(printWindow) {
-                printWindow.document.write(`<html><head><title>Makbuz</title><style>body { font-family: sans-serif; margin: 2rem; } .receipt { border: 1px solid #ccc; padding: 2rem; max-width: 600px; margin: auto; } h1 { text-align: center; } table { width: 100%; border-collapse: collapse; margin-top: 2rem; } th, td { border: 1px solid #eee; padding: 0.75rem; text-align: left; } th { background-color: #f8f8f8; } .footer { margin-top: 2rem; text-align: center; font-size: 0.9rem; color: #777; }</style></head><body>${printContent}<script>window.onload=function(){window.print();window.close();}</script></body></html>`);
-                printWindow.document.close();
+    const handleDeleteDonation = async (donationId: string) => {
+        if (window.confirm('Bu bağış kaydını silmek istediğinizden emin misiniz?')) {
+            try {
+                await deleteBagis(donationId);
+                toast.success('Bağış kaydı silindi');
+                refresh();
+            } catch (error) {
+                toast.error('Silme işlemi başarısız');
             }
         }
     };
-    return (
-        <Modal isOpen={true} onClose={onClose} title="Bağış Makbuzu">
-            <div ref={printAreaRef} className="receipt">
-                <h1 className="text-2xl font-bold text-center">KAFKASDER BAĞIŞ MAKBUZU</h1>
-                <p className="text-center text-sm text-slate-500">Makbuz No: {donation.makbuzNo}</p>
-                <table className="mt-6 w-full">
-                    <tbody>
-                        <tr><th className="w-1/3 p-2 bg-slate-50">Tarih</th><td className="p-2">{new Date(donation.tarih).toLocaleDateString('tr-TR')}</td></tr>
-                        <tr><th className="p-2 bg-slate-50">Bağışçı</th><td className="p-2 font-semibold">{donorName}</td></tr>
-                        <tr><th className="p-2 bg-slate-50">Tutar</th><td className="p-2 font-bold text-xl">{donation.tutar.toLocaleString('tr-TR', { style: 'currency', currency: donation.paraBirimi })}</td></tr>
-                        <tr><th className="p-2 bg-slate-50">Açıklama</th><td className="p-2">{donation.aciklama || donation.bagisTuru}</td></tr>
-                    </tbody>
-                </table>
-                <div className="footer mt-8 text-center text-slate-600">
-                    <p>Yaptığınız bu değerli bağış için KAFKASDER adına teşekkür ederiz.</p>
+
+    const handleShowReceipt = (donation: Bagis) => {
+        setReceiptDonation(donation);
+        setIsReceiptModalOpen(true);
+    };
+
+    if (isLoading) {
+        return (
+            <div className="p-8 space-y-8 bg-gradient-to-br from-gray-50 to-blue-50/30 min-h-screen">
+                <div className="animate-pulse space-y-8">
+                    <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        {[...Array(4)].map((_, i) => (
+                            <div key={i} className="h-32 bg-gray-200 rounded-2xl"></div>
+                        ))}
+                    </div>
                 </div>
             </div>
-            <div className="pt-6 mt-6 border-t flex justify-end space-x-3">
-                <Button type="button" variant="outline" onClick={onClose}>Kapat</Button>
-                <Button type="button" variant="primary" onClick={handlePrint}>Yazdır</Button>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="p-8 bg-gradient-to-br from-gray-50 to-blue-50/30 min-h-screen">
+                <ModernCard variant="default" className="text-center">
+                    <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full">
+                        <AlertTriangle className="h-8 w-8 text-red-600" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Veri Yüklenemedi</h3>
+                    <p className="text-gray-600 mb-4">{error}</p>
+                    <ModernButton variant="primary" onClick={refresh}>
+                        Yeniden Dene
+                    </ModernButton>
+                </ModernCard>
             </div>
-        </Modal>
+        );
+    }
+
+    return (
+        <div className="p-8 space-y-8 bg-gradient-to-br from-gray-50 to-blue-50/30 min-h-screen">
+            {/* Enhanced Header */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                        <div className="w-12 h-12 bg-gradient-to-r from-rose-500 to-pink-600 rounded-2xl flex items-center justify-center">
+                            <Heart className="h-6 w-6 text-white" />
+                        </div>
+                        Bağış Yönetimi
+                        <Sparkles className="h-8 w-8 text-rose-500" />
+                    </h1>
+                    <p className="text-gray-600">Bağış kayıtlarını yönetin ve raporlayın</p>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                    <ModernButton variant="outline" icon={<Filter className="h-4 w-4" />}>
+                        Filtrele
+                    </ModernButton>
+                    <ModernButton variant="outline" icon={<Download className="h-4 w-4" />}>
+                        Dışa Aktar
+                    </ModernButton>
+                    <ModernButton variant="primary" onClick={handleAddDonation} icon={<Plus className="h-4 w-4" />}>
+                        Yeni Bağış Ekle
+                    </ModernButton>
+                </div>
+            </div>
+
+            {/* Enhanced Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <ModernCard variant="interactive" className="group">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="text-3xl font-bold text-gray-900">
+                                {formatCurrency(donations.reduce((sum, d) => sum + (d.tutar ?? 0), 0))}
+                            </h3>
+                            <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Toplam Bağış</p>
+                            <div className="flex items-center gap-1 mt-2">
+                                <TrendingUp className="h-4 w-4 text-green-500" />
+                                <span className="text-xs text-green-600 font-medium">+12% bu ay</span>
+                            </div>
+                        </div>
+                        <div className="w-12 h-12 bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300">
+                            <Heart className="h-6 w-6" />
+                        </div>
+                    </div>
+                </ModernCard>
+
+                <ModernCard variant="interactive" className="group">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="text-3xl font-bold text-gray-900">{formatCurrency(monthlyTotal)}</h3>
+                            <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Bu Ay</p>
+                            <div className="flex items-center gap-1 mt-2">
+                                <Calendar className="h-4 w-4 text-blue-500" />
+                                <span className="text-xs text-blue-600 font-medium">{donations.filter(d => new Date(d.tarih).getMonth() === new Date().getMonth()).length} işlem</span>
+                            </div>
+                        </div>
+                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300">
+                            <DollarSign className="h-6 w-6" />
+                        </div>
+                    </div>
+                </ModernCard>
+
+                <ModernCard variant="interactive" className="group">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="text-3xl font-bold text-gray-900">{donorCount}</h3>
+                            <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Bağışçı Sayısı</p>
+                            <div className="flex items-center gap-1 mt-2">
+                                <Users className="h-4 w-4 text-purple-500" />
+                                <span className="text-xs text-purple-600 font-medium">Toplam kişi</span>
+                            </div>
+                        </div>
+                        <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-violet-600 rounded-xl flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300">
+                            <Users className="h-6 w-6" />
+                        </div>
+                    </div>
+                </ModernCard>
+
+                <ModernCard variant="interactive" className="group">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="text-3xl font-bold text-gray-900">{formatCurrency(averageDonation)}</h3>
+                            <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Ortalama Bağış</p>
+                            <div className="flex items-center gap-1 mt-2">
+                                <TrendingUp className="h-4 w-4 text-emerald-500" />
+                                <span className="text-xs text-emerald-600 font-medium">Per kişi</span>
+                            </div>
+                        </div>
+                        <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300">
+                            <Receipt className="h-6 w-6" />
+                        </div>
+                    </div>
+                </ModernCard>
+            </div>
+
+            {/* Smart Search and Filters */}
+            <ModernCard variant="glass" className="border border-blue-100/50">
+                <ModernCardContent>
+                    <div className="flex flex-col lg:flex-row gap-4">
+                        <div className="flex-1">
+                            <div className="relative">
+                                <ModernInput
+                                    type="text"
+                                    placeholder="🤖 AI Destekli Arama (bağışçı adı, makbuz no...)"
+                                    value={filters.searchTerm}
+                                    onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })}
+                                    className="pr-12"
+                                />
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                    <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">
+                                        <Sparkles className="h-3 w-3 text-white" />
+                                        <span className="text-xs text-white font-bold">AI</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="flex gap-3">
+                            <select 
+                                value={filters.typeFilter} 
+                                onChange={(e) => setFilters({ ...filters, typeFilter: e.target.value as BagisTuru | 'all' })}
+                                className="px-4 py-3 bg-white border border-gray-200 rounded-xl transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                            >
+                                <option value="all">Tüm Türler</option>
+                                <option value={BagisTuru.NAKIT}>Nakit</option>
+                                <option value={BagisTuru.AYNI}>Ayni</option>
+                                <option value={BagisTuru.FITRE_SADAKA}>Fitre/Sadaka</option>
+                                <option value={BagisTuru.ZEKAT}>Zekat</option>
+                                <option value={BagisTuru.KURBAN}>Kurban</option>
+                            </select>
+                            
+                            <ModernButton 
+                                variant="outline" 
+                                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                                icon={<Filter className="h-4 w-4" />}
+                            >
+                                Gelişmiş Filtre
+                            </ModernButton>
+                        </div>
+                    </div>
+                </ModernCardContent>
+            </ModernCard>
+
+            {/* Advanced Filters */}
+            {showAdvancedFilters && (
+                <ModernCard variant="default">
+                    <ModernCardHeader 
+                        title="Gelişmiş Filtreler" 
+                        subtitle="Detaylı arama kriterleri"
+                        icon={<Filter className="h-5 w-5" />}
+                    />
+                    <ModernCardContent>
+                        <AdvancedFilter onFilterChange={(filters) => console.log('Advanced filters:', filters)} />
+                    </ModernCardContent>
+                </ModernCard>
+            )}
+
+            {/* Donations Table */}
+            <ModernCard variant="default">
+                <ModernCardHeader 
+                    title="Bağış Kayıtları" 
+                    subtitle={`Toplam ${filteredDonations.length} kayıt`}
+                    icon={<Heart className="h-5 w-5" />}
+                    actions={
+                        <div className="flex gap-2">
+                            <ModernButton variant="outline" size="sm" icon={<Download className="h-4 w-4" />}>
+                                Excel
+                            </ModernButton>
+                            <ModernButton variant="outline" size="sm" icon={<Receipt className="h-4 w-4" />}>
+                                PDF
+                            </ModernButton>
+                        </div>
+                    }
+                />
+                <ModernCardContent>
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="border-b border-gray-200">
+                                    <th className="text-left py-3 px-4 font-semibold text-gray-600">Bağışçı</th>
+                                    <th className="text-left py-3 px-4 font-semibold text-gray-600">Tür</th>
+                                    <th className="text-left py-3 px-4 font-semibold text-gray-600">Tutar</th>
+                                    <th className="text-left py-3 px-4 font-semibold text-gray-600">Tarih</th>
+                                    <th className="text-left py-3 px-4 font-semibold text-gray-600">Makbuz No</th>
+                                    <th className="text-left py-3 px-4 font-semibold text-gray-600">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredDonations.slice((page - 1) * pageSize, page * pageSize).map((donation) => (
+                                    <tr key={donation.id} className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors">
+                                        <td className="py-4 px-4">
+                                            <div className="font-medium text-gray-900">
+                                                {peopleMap.get(String(donation.bagisciId)) || 'Bilinmeyen'}
+                                            </div>
+                                        </td>
+                                        <td className="py-4 px-4">
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-200">
+                                                {donation.bagisTuru}
+                                            </span>
+                                        </td>
+                                        <td className="py-4 px-4">
+                                            <span className="font-bold text-green-600">
+                                                {formatCurrency(donation.tutar || 0)}
+                                            </span>
+                                        </td>
+                                        <td className="py-4 px-4 text-gray-600">
+                                            {formatDate(donation.tarih)}
+                                        </td>
+                                        <td className="py-4 px-4">
+                                            <span className="font-mono text-sm text-gray-500">
+                                                {donation.makbuzNo || '-'}
+                                            </span>
+                                        </td>
+                                        <td className="py-4 px-4">
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => handleShowReceipt(donation)}
+                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    title="Makbuz Görüntüle"
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleEditDonation(donation)}
+                                                    className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                                                    title="Düzenle"
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteDonation(donation.id)}
+                                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                    title="Sil"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Pagination */}
+                    <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                        <div className="text-sm text-gray-600">
+                            {((page - 1) * pageSize) + 1}-{Math.min(page * pageSize, filteredDonations.length)} / {filteredDonations.length} kayıt
+                        </div>
+                        <div className="flex gap-2">
+                            <ModernButton 
+                                variant="outline" 
+                                size="sm" 
+                                disabled={page === 1}
+                                onClick={() => setPage(page - 1)}
+                            >
+                                Önceki
+                            </ModernButton>
+                            <ModernButton 
+                                variant="outline" 
+                                size="sm" 
+                                disabled={page * pageSize >= filteredDonations.length}
+                                onClick={() => setPage(page + 1)}
+                            >
+                                Sonraki
+                            </ModernButton>
+                        </div>
+                    </div>
+                </ModernCardContent>
+            </ModernCard>
+
+            {/* Form Modal */}
+            {isFormModalOpen && (
+                <Modal isOpen={true} onClose={() => setIsFormModalOpen(false)} title={editingDonation?.id ? 'Bağış Düzenle' : 'Yeni Bağış Ekle'}>
+                    <form onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSaveDonation(editingDonation || {});
+                    }} className="space-y-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Bağışçı</label>
+                                <select 
+                                    value={editingDonation?.bagisciId || ''} 
+                                    onChange={(e) => setEditingDonation({ ...editingDonation, bagisciId: e.target.value })}
+                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                                    required
+                                >
+                                    <option value="">Bağışçı Seçin</option>
+                                    {people.map(person => (
+                                        <option key={person.id} value={person.id}>
+                                            {(person as any).ad ?? person.first_name} {(person as any).soyad ?? person.last_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Bağış Türü</label>
+                                <select 
+                                    value={editingDonation?.bagisTuru || ''} 
+                                    onChange={(e) => setEditingDonation({ ...editingDonation, bagisTuru: e.target.value as BagisTuru })}
+                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                                    required
+                                >
+                                    <option value="">Tür Seçin</option>
+                                    <option value={BagisTuru.NAKIT}>Nakit</option>
+                                    <option value={BagisTuru.AYNI}>Ayni</option>
+                                    <option value={BagisTuru.FITRE_SADAKA}>Fitre/Sadaka</option>
+                                    <option value={BagisTuru.ZEKAT}>Zekat</option>
+                                    <option value={BagisTuru.KURBAN}>Kurban</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Tutar</label>
+                                <ModernInput 
+                                    type="number" 
+                                    value={editingDonation?.tutar || ''} 
+                                    onChange={(e) => setEditingDonation({ ...editingDonation, tutar: Number(e.target.value) })}
+                                    placeholder="0.00"
+                                    step="0.01"
+                                    min="0"
+                                    required 
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Tarih</label>
+                                <ModernInput 
+                                    type="date" 
+                                    value={editingDonation?.tarih || ''} 
+                                    onChange={(e) => setEditingDonation({ ...editingDonation, tarih: e.target.value })}
+                                    required 
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Açıklama</label>
+                            <textarea 
+                                value={editingDonation?.aciklama || ''} 
+                                onChange={(e) => setEditingDonation({ ...editingDonation, aciklama: e.target.value })}
+                                placeholder="Bağış ile ilgili ek bilgiler..."
+                                rows={3}
+                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-none"
+                            />
+                        </div>
+
+                        <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
+                            <ModernButton variant="secondary" onClick={() => setIsFormModalOpen(false)}>
+                                İptal
+                            </ModernButton>
+                            <ModernButton 
+                                type="submit" 
+                                variant="primary"
+                                icon={<CheckCircle className="h-4 w-4" />}
+                            >
+                                {editingDonation?.id ? 'Güncelle' : 'Kaydet'}
+                            </ModernButton>
+                        </div>
+                    </form>
+                </Modal>
+            )}
+
+            {/* Receipt Modal */}
+            {isReceiptModalOpen && receiptDonation && (
+                <Modal isOpen={true} onClose={() => setIsReceiptModalOpen(false)} title="Bağış Makbuzu">
+                    <div className="space-y-6">
+                        <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200">
+                            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+                                <Receipt className="h-8 w-8 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-2">Kafkasder Bağış Makbuzu</h3>
+                            <p className="text-blue-600 font-medium">#{receiptDonation.makbuzNo}</p>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-sm font-medium text-gray-500">Bağışçı</label>
+                                <p className="text-lg font-semibold text-gray-900">
+                                    {peopleMap.get(String(receiptDonation.bagisciId))}
+                                </p>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-500">Tutar</label>
+                                <p className="text-lg font-bold text-green-600">
+                                    {formatCurrency(receiptDonation.tutar || 0)}
+                                </p>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-500">Tür</label>
+                                <p className="text-lg font-semibold text-gray-900">{receiptDonation.bagisTuru}</p>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-500">Tarih</label>
+                                <p className="text-lg font-semibold text-gray-900">
+                                    {formatDate(receiptDonation.tarih)}
+                                </p>
+                            </div>
+                        </div>
+
+                        {receiptDonation.aciklama && (
+                            <div>
+                                <label className="text-sm font-medium text-gray-500">Açıklama</label>
+                                <p className="text-gray-900">{receiptDonation.aciklama}</p>
+                            </div>
+                        )}
+
+                        <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
+                            <ModernButton variant="outline" icon={<Download className="h-4 w-4" />}>
+                                PDF İndir
+                            </ModernButton>
+                            <ModernButton variant="primary" onClick={() => setIsReceiptModalOpen(false)}>
+                                Kapat
+                            </ModernButton>
+                        </div>
+                    </div>
+                </Modal>
+            )}
+        </div>
     );
 };
 
