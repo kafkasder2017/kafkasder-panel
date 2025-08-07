@@ -28,7 +28,9 @@ const KurumYonetimi: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingKurum, setEditingKurum] = useState<Partial<Kurum> | null>(null);
 
-    const peopleMap = useMemo(() => new Map(people.map(p => [p.id, `${p.ad} ${p.soyad}`])), [people]);
+    const peopleMap = useMemo(() => new Map(
+        people.filter(p => p && p.id).map(p => [p.id, `${p.ad || ''} ${p.soyad || ''}`.trim() || 'İsimsiz'])
+    ), [people]);
 
     const filteredKurumlar = useMemo(() => {
         return kurumlar.filter(kurum => {
