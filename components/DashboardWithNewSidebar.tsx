@@ -164,7 +164,7 @@ function DashboardWithNewSidebar() {
                   className="h-20 flex-col gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
                   onClick={() => handleSectionChange('raporlama-analitik')}
                 >
-                  <ChartBar className="h-6 w-6" />
+                  <BarChart className="h-6 w-6" />
                   <span className="text-sm">Rapor Görüntüle</span>
                 </Button>
               </div>
