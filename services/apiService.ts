@@ -269,11 +269,13 @@ export const getDavalar = async (): Promise<Dava[]> => {
         return await getAll<Dava>('davalar');
     } catch (error: any) {
         // If table doesn't exist, return empty array
-        if (error?.code === 'PGRST116' || error?.message?.includes('relation') || error?.message?.includes('does not exist')) {
+        if (error?.code === 'PGRST116' || error?.message?.includes('relation') || error?.message?.includes('does not exist') || error?.message?.includes('table')) {
             console.warn('Davalar table does not exist, returning empty array');
             return [];
         }
-        throw error;
+        // Log the actual error for debugging but still return empty array to prevent crashes
+        console.error('Supabase error in getDavalar:', error);
+        return [];
     }
 };
 export const getDavaById = (id: number): Promise<Dava> => getById<Dava>('davalar', id);
