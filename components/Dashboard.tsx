@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import * as ReactRouterDOM from 'react-router-dom';
@@ -187,11 +186,27 @@ const Dashboard = () => {
 
     return (
         <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">
+            {/* Demo link for new sidebar */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200">🎨 Yeni Sidebar Tasarımı</h3>
+                        <p className="text-sm text-blue-600 dark:text-blue-300">Modern ve gelişmiş sidebar tasarımını önizleyin</p>
+                    </div>
+                    <ReactRouterDOM.Link
+                        to="/new-sidebar-demo"
+                        className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105"
+                    >
+                        Demo'yu Görüntüle
+                    </ReactRouterDOM.Link>
+                </div>
+            </div>
+
              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                <StatCard 
-                    title="Toplam Üye Sayısı" 
-                    value={safeNumber(stats?.totalMembers)} 
-                    icon={ICONS.PEOPLE} 
+                <StatCard
+                    title="Toplam Üye Sayısı"
+                    value={safeNumber(stats?.totalMembers)}
+                    icon={ICONS.PEOPLE}
                     color="primary"
                 />
                 <StatCard 
