@@ -154,7 +154,7 @@ const BosaltModal: React.FC<{ kumbara: Kumbara, onClose: () => void, onSave: (ku
         <Modal isOpen={true} onClose={onClose} title={`Kumbara Boşalt: ${kumbara.code}`}>
              <form onSubmit={handleSubmit} className="space-y-4">
                 <p><strong>Konum:</strong> {kumbara.location}</p>
-                <p>Mevcut Bakiye: <span className="font-bold">{kumbara.balance.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}</span></p>
+                <p>Mevcut Bakiye: <span className="font-bold">{kumbara.balance != null ? kumbara.balance.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) : '₺0,00'}</span></p>
                 <Input label="Toplanan Tutar (TL)" type="number" value={toplananTutar} onChange={(e) => setToplananTutar(Number(e.target.value))} required />
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Bu tutar yeni bir gelir kaydı olarak işlenecek ve kumbara bakiyesi sıfırlanacaktır.</p>
                 <div className="pt-4 flex justify-end space-x-3">
