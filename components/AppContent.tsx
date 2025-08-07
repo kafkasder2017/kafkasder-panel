@@ -147,13 +147,19 @@ export default function AppContent({ user, userRole }: AppContentProps) {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
-      <KafkasderSidebar 
-        activeSection={getCurrentSection()} 
-        onSectionChange={handleNavigation} 
+    <div className="flex h-screen bg-gradient-to-br from-gray-50 via-blue-50/20 to-indigo-50/30 relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.03]">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full blur-3xl"></div>
+      </div>
+
+      <KafkasderSidebar
+        activeSection={getCurrentSection()}
+        onSectionChange={handleNavigation}
       />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
+
+      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         {/* Mobile header */}
         <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-200 lg:hidden">
           <div className="flex items-center justify-between px-6 py-4">
