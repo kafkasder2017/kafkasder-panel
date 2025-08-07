@@ -9,6 +9,7 @@ import { KullaniciRol } from './types';
 import Login from './components/Login';
 import Sidebar from './components/Sidebar';
 import { KafkasderSidebar } from './components/KafkasderSidebar';
+import AppContent from './components/AppContent';
 import ErrorBoundary from './components/ErrorBoundary';
 import ProtectedRoute from './components/ProtectedRoute';
 import ThemeProvider from './components/ThemeContext';
