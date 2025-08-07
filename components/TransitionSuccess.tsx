@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card } from './ui/card';
+import { Card } from './ui/Card';
 import { CheckCircle, Trash2, Sparkles, ArrowRight } from 'lucide-react';
 
 export default function TransitionSuccess() {
