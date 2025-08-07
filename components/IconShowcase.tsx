@@ -224,10 +224,32 @@ export default function IconShowcase() {
           <div className="bg-gray-900 rounded-lg p-4">
             <h3 className="text-white font-semibold mb-2">Tailwind CSS ile</h3>
             <pre className="text-gray-300 text-sm">
-{`<QuestionMarkIcon 
-  size={16} 
-  color="currentColor" 
-  className="text-blue-500 hover:text-blue-600" 
+{`<QuestionMarkIcon
+  size={16}
+  color="currentColor"
+  className="text-blue-500 hover:text-blue-600 transition-colors"
+/>`}
+            </pre>
+          </div>
+
+          <div className="bg-gray-900 rounded-lg p-4">
+            <h3 className="text-white font-semibold mb-2">Responsive Boyutlar</h3>
+            <pre className="text-gray-300 text-sm">
+{`<QuestionMarkIcon
+  size={16}
+  color="currentColor"
+  className="text-gray-500 sm:text-blue-500 md:text-green-500 lg:text-purple-500"
+/>`}
+            </pre>
+          </div>
+
+          <div className="bg-gray-900 rounded-lg p-4">
+            <h3 className="text-white font-semibold mb-2">Dark Mode Desteği</h3>
+            <pre className="text-gray-300 text-sm">
+{`<QuestionMarkIcon
+  size={20}
+  color="currentColor"
+  className="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400"
 />`}
             </pre>
           </div>
