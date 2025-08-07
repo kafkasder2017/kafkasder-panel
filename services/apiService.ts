@@ -460,7 +460,30 @@ export const updateWebhook = (id: number, webhook: Partial<Webhook>): Promise<We
 export const deleteWebhook = (id: number): Promise<void> => deleteRecord('webhooks', id);
 
 // Ayarlar - Use system_settings table instead of ayarlar
-export const getSistemAyarlari = (): Promise<SistemAyarlari> => getById<SistemAyarlari>('system_settings', 1);
+export const getSistemAyarlari = async (): Promise<SistemAyarlari> => {
+    try {
+        return await getById<SistemAyarlari>('system_settings', 1);
+    } catch (error: any) {
+        // If table doesn't exist or record doesn't exist, return default settings
+        if (error?.code === 'PGRST116' || error?.message?.includes('relation') || error?.message?.includes('does not exist')) {
+            console.warn('System_settings table or record does not exist, returning default settings');
+            return {
+                id: 1,
+                site_name: 'Kafkasder Panel',
+                site_description: 'Dernek Yönetim Sistemi',
+                email_notifications: true,
+                sms_notifications: false,
+                maintenance_mode: false,
+                max_file_size: 10,
+                allowed_file_types: ['pdf', 'doc', 'docx', 'jpg', 'png'],
+                backup_frequency: 'daily',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            } as SistemAyarlari;
+        }
+        throw error;
+    }
+};
 export const updateSistemAyarlari = (settings: Partial<SistemAyarlari>): Promise<SistemAyarlari> => updateRecord<SistemAyarlari>('system_settings', 1, settings);
 
 // Aidatlar
