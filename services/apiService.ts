@@ -138,7 +138,7 @@ export const getProfileForUser = async (user: { email?: string }): Promise<Profi
 // --- API FUNCTIONS --- //
 
 // Denetim Kayıtları
-export const getDenetimKayitlari = (): Promise<DenetimKaydi[]> => getAll<DenetimKaydi>('denetim_kayitlari');
+export const getDenetimKayitlari = (): Promise<DenetimKaydi[]> => getAllSafe<DenetimKaydi>('denetim_kayitlari');
 export const createDenetimKaydi = (kayit: Omit<DenetimKaydi, 'id'>): Promise<DenetimKaydi> => createRecord<DenetimKaydi>('denetim_kayitlari', kayit);
 
 // Yorumlar
