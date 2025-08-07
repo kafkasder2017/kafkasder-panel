@@ -284,7 +284,7 @@ export interface Person {
     person_type?: string; // Maps to 'membershipType'
     registration_date?: string; // Maps to 'kayitTarihi'
     registration_status?: string; // Maps to 'kayitDurumu'
-    consent_statement?: RizaBeyaniStatus; // Maps to 'rizaBeyani'
+    consent_statement?: RizaBeyaniStatus; // Frontend-only field - NOT in database schema
     file_number?: string; // Maps to 'dosyaNumarasi'
     sponsorship_type?: SponsorlukTipi; // Maps to 'sponsorlukTipi'
     file_connection?: DosyaBaglantisi; // Maps to 'dosyaBaglantisi'
