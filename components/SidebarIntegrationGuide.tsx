@@ -3,7 +3,7 @@ import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Code, Copy, CheckCircle, ArrowRight } from 'lucide-react';
 
-export function SidebarIntegrationGuide() {
+function SidebarIntegrationGuide() {
   const [copied, setCopied] = React.useState<string | null>(null);
 
   const copyToClipboard = (text: string, id: string) => {
