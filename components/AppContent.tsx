@@ -46,6 +46,7 @@ const DosyaYonetimi = React.lazy(() => import('./DosyaYonetimi'));
 const GuvenlikAyarlari = React.lazy(() => import('../src/pages/GuvenlikAyarlari'));
 const WhatsApp = React.lazy(() => import('../src/pages/WhatsApp'));
 const ApiEntegrasyonu = React.lazy(() => import('./ApiEntegrasyonu'));
+const { MobileApp, ApiDashboard, DataAnalytics, WebServices } = React.lazy(() => import('./TechInnovation'));
 
 interface AppContentProps {
   user: User;
