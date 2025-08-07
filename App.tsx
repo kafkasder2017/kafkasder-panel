@@ -8,6 +8,7 @@ import { KullaniciRol } from './types';
 // Components (statik ve küçük olanlar)
 import Login from './components/Login';
 import Sidebar from './components/Sidebar';
+import { KafkasderSidebar } from './components/KafkasderSidebar';
 import ErrorBoundary from './components/ErrorBoundary';
 import ProtectedRoute from './components/ProtectedRoute';
 import ThemeProvider from './components/ThemeContext';
