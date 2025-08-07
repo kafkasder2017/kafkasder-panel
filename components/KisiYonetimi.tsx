@@ -433,8 +433,7 @@ const KisiYonetimi: React.FC = () => {
                         neighborhood: personToSave.neighborhood || '',
                         file_number: personToSave.file_number || `DN${Date.now()}`,
                         sponsorship_type: personToSave.sponsorship_type || SponsorlukTipi.YOK,
-                        registration_status: personToSave.registration_status || 'Kaydedildi',
-                        consent_statement: personToSave.consent_statement || RizaBeyaniStatus.ALINDI
+                        registration_status: personToSave.registration_status || 'Kaydedildi'
                     } as Omit<Person, 'id'>;
                     await createPerson(payload);
                 }
