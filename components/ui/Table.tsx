@@ -122,12 +122,15 @@ export const Table = <T extends Record<string, any> = Record<string, unknown>>({
   };
   
   const sortedData = React.useMemo(() => {
-    if (!sortColumn) return data;
-    
-    return [...data].sort((a, b) => {
+    // Filter out null or undefined records
+    const filteredData = data.filter(record => record != null);
+
+    if (!sortColumn) return filteredData;
+
+    return [...filteredData].sort((a, b) => {
       const aValue = (a as any)[sortColumn];
       const bValue = (b as any)[sortColumn];
-      
+
       if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
       if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
       return 0;
