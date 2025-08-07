@@ -207,7 +207,7 @@ export default function AppContent({ user, userRole }: AppContentProps) {
                 
                 {/* Diğer Modüller */}
                 <Route path="/harita" element={<ProtectedRoute userRole={userRole}><HaritaModulu /></ProtectedRoute>} />
-                <Route path="/dokuman-arsivi" element={<ProtectedRoute userRole={userRole}><DosyaArsivi /></ProtectedRoute>} />
+                <Route path="/dokuman-arsivi" element={<ProtectedRoute userRole={userRole}><DosyaYonetimi /></ProtectedRoute>} />
                 <Route path="/uyeler" element={<ProtectedRoute userRole={userRole}><UyeYonetimi /></ProtectedRoute>} />
                 <Route path="/takvim" element={<ProtectedRoute userRole={userRole}><Takvim /></ProtectedRoute>} />
                 <Route path="/finansal-kayitlar" element={<ProtectedRoute userRole={userRole}><FinansalKayitlar /></ProtectedRoute>} />
