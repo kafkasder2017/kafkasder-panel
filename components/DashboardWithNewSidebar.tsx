@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { KafkasderSidebar } from './KafkasderSidebar';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
-import { Users, Heart, Calendar, ChartBar, TrendingUp, DollarSign } from 'lucide-react';
+import { Users, Heart, Calendar, BarChart, TrendingUp, DollarSign } from 'lucide-react';
 
 function DashboardWithNewSidebar() {
   const [activeSection, setActiveSection] = useState('dashboard');
