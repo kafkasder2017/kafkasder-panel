@@ -151,6 +151,7 @@ function App() {
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/new-sidebar-demo" element={<DashboardWithNewSidebar />} />
                     <Route path="/sidebar-integration-guide" element={<SidebarIntegrationGuide />} />
+                    <Route path="/icon-showcase" element={<IconShowcase />} />
                     {/* Kişiler & Kurumlar */}
                     <Route path="/kisiler" element={<ProtectedRoute userRole={userRole}><KisiYonetimi /></ProtectedRoute>} />
                     <Route path="/gonulluler" element={<ProtectedRoute userRole={userRole}><GonulluYonetimi /></ProtectedRoute>} />
