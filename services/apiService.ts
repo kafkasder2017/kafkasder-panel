@@ -266,7 +266,7 @@ export const updateProje = (id: number, proje: Partial<Proje>): Promise<Proje> =
 export const deleteProje = (id: number): Promise<void> => deleteRecord('projects', id);
 
 // Bağışlar
-export const getBagislar = (): Promise<Bagis[]> => getAll<Bagis>('donations');
+export const getBagislar = (): Promise<Bagis[]> => getAllSafe<Bagis>('donations');
 export const createBagis = (bagis: Omit<Bagis, 'id'>): Promise<Bagis> => createRecord<Bagis>('donations', bagis);
 export const updateBagis = (id: number, bagis: Partial<Bagis>): Promise<Bagis> => updateRecord<Bagis>('donations', id, bagis);
 export const deleteBagis = (id: number): Promise<void> => deleteRecord('donations', id);
