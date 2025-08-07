@@ -17,7 +17,7 @@ const getStatusClass = (status: PersonStatus) => {
 
 const KurumYonetimi: React.FC = () => {
     const { data, isLoading, error, refresh } = useKurumYonetimi();
-    const { kurumlar, people } = data;
+    const { kurumlar = [], people = [] } = data || {};
 
     const [filters, setFilters] = useState({
         searchTerm: '',
