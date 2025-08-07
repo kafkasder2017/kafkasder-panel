@@ -242,14 +242,18 @@ export function ModernTable<T extends { id: string | number }>({
               icon={<ChevronRight className="h-4 w-4" />}
               onClick={() => pagination.onPageChange(pagination.page + 1)}
               disabled={pagination.page >= Math.ceil(pagination.total / pagination.pageSize)}
-            />
+            >
+              Sonraki
+            </ModernButton>
             <ModernButton
               variant="ghost"
               size="sm"
               icon={<ChevronsRight className="h-4 w-4" />}
               onClick={() => pagination.onPageChange(Math.ceil(pagination.total / pagination.pageSize))}
               disabled={pagination.page >= Math.ceil(pagination.total / pagination.pageSize)}
-            />
+            >
+              Son
+            </ModernButton>
           </div>
         </div>
       )}
