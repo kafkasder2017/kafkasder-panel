@@ -198,8 +198,8 @@ export default function AppContent({ user, userRole }: AppContentProps) {
                 <Route path="/yardim-yonetimi/nakdi-yardimlar" element={<ProtectedRoute userRole={userRole}><YardimBasvurulari /></ProtectedRoute>} />
                 <Route path="/yardim-yonetimi/ayni-yardimlar" element={<ProtectedRoute userRole={userRole}><AyniYardimIslemleri /></ProtectedRoute>} />
                 <Route path="/yardim-yonetimi/tum-yardimlar" element={<ProtectedRoute userRole={userRole}><YardimBasvurulari /></ProtectedRoute>} />
-                <Route path="/depo-yonetimi" element={<ProtectedRoute userRole={userRole}><DepoYonetimi /></ProtectedRoute>} />
-                <Route path="/vefa-destek" element={<ProtectedRoute userRole={userRole}><VefaDestek /></ProtectedRoute>} />
+                <Route path="/depo-yonetimi" element={<ProtectedRoute userRole={userRole}><StokYonetimi /></ProtectedRoute>} />
+                <Route path="/vefa-destek" element={<ProtectedRoute userRole={userRole}><VefaDestekYonetimi /></ProtectedRoute>} />
                 <Route path="/odemeler" element={<ProtectedRoute userRole={userRole}><OdemeYonetimi /></ProtectedRoute>} />
                 <Route path="/yardim-yonetimi/hizmet-takip" element={<ProtectedRoute userRole={userRole}><YardimBasvurulari /></ProtectedRoute>} />
                 <Route path="/yardim-yonetimi/hastane-sevk" element={<ProtectedRoute userRole={userRole}><YardimBasvurulari /></ProtectedRoute>} />
