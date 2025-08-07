@@ -18,7 +18,26 @@ import { MOCK_ETKINLIKLER } from '../data/mockEtkinlikler';
 // --- Generic Supabase Helper Functions ---
 const handleSupabaseError = (error: any, context: string) => {
     console.error(`Supabase error in ${context}:`, error);
-    const errorMessage = error?.message || error?.error_description || JSON.stringify(error);
+
+    // Provide specific error messages for common issues
+    let errorMessage = error?.message || error?.error_description;
+
+    if (!errorMessage) {
+        // If no message, try to extract meaningful info
+        if (error?.code) {
+            errorMessage = `Database error code: ${error.code}`;
+        } else {
+            errorMessage = 'Unknown database error';
+        }
+    }
+
+    // Add context to common errors
+    if (errorMessage.includes('column') && errorMessage.includes('does not exist')) {
+        errorMessage += '. This may indicate a database schema mismatch.';
+    } else if (errorMessage.includes('relation') && errorMessage.includes('does not exist')) {
+        errorMessage += '. The database table may not exist.';
+    }
+
     throw new Error(`Veritabanı hatası (${context}): ${errorMessage}`);
 };
 
@@ -275,7 +294,7 @@ export const createFinansalKayit = (kayit: Omit<FinansalKayit, 'id'>): Promise<F
 export const updateFinansalKayit = (id: number, kayit: Partial<FinansalKayit>): Promise<FinansalKayit> => updateRecord<FinansalKayit>('financial_transactions', id, kayit);
 export const deleteFinansalKayit = (id: number): Promise<void> => deleteRecord('financial_transactions', id);
 
-// G��nüllüler - Placeholder functions that use people table with filters
+// Gönüllüler - Placeholder functions that use people table with filters
 export const getGonulluler = async (): Promise<Gonullu[]> => {
     const people = await getPeople();
     return people
