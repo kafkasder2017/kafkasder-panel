@@ -1,0 +1,34 @@
+import React from 'react';
+
+interface QuestionMarkIconProps {
+  className?: string;
+  size?: number;
+  color?: string;
+}
+
+export const QuestionMarkIcon: React.FC<QuestionMarkIconProps> = ({ 
+  className = '', 
+  size = 14, 
+  color = '#ffffff' 
+}) => {
+  return (
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 8 14"
+      fill="none"
+    >
+      <path
+        fill={color}
+        fillOpacity="1"
+        fillRule="nonzero"
+        stroke="none"
+        d="M5 13H4v1h1zM4 1C2.343 1 1 2.343 1 4H0c0-2.21 1.79-4 4-4 2.21 0 4 1.79 4 4 0 1.268-.59 2.398-1.51 3.13l-.083.065C5.553 7.833 5 8.852 5 10H4c0-1.424.662-2.694 1.694-3.518l.083-.064C6.519 5.87 7 4.992 7 4c0-1.657-1.343-3-3-3"
+      />
+    </svg>
+  );
+};
+
+export default QuestionMarkIcon;
